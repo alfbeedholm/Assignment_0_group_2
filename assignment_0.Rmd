@@ -54,8 +54,6 @@ REMEMBER: This assignment will be part of your final portfolio
 3) Which variables should be indicated as nominal/categorical?  
     i. use _factor()_ to explicitly change these variables into the nominal/categorical category
 
---------------------------------------------------- *Florin* ---------------------------------------------------  
-
 --------------------------------------------------- *Florin* ---------------------------------------------------
 
 ## Exercise B - pooling - linear regression
@@ -125,13 +123,12 @@ models["partial-pooling model with different subjects intercepts"] <- pp_model_n
 compare_var(models, complete_comparison = FALSE)
 ```
 
-Compared to the previous models, the partial-pooling model that includes random intercepts for both scenarios and subjects accounts for the most variance.
+  Compared to the previous models, the partial-pooling model that includes random intercepts for both scenarios and subjects accounts for the most variance.
 
 iii. how would you model a no-pooling model that took both _subject_ and _scenario_ into account?
 
 ```{r}
-np_model_new <- lm(data = df,
-                   formula = total_duration ~ f0mn + scenario - 1 + subject - 1)
+np_model_new <- lm(data = df, formula = total_duration ~ f0mn + scenario - 1 + subject - 1)
 ```
 
 iv. each _subject_ was exposed to each _scenario_; what is the effect of using the second-level effect (1 + subject:scenario) with the first-level effects already modeled?
