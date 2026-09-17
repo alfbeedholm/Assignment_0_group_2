@@ -19,31 +19,23 @@ REMEMBER: In your portfolio, make sure to include code that can reproduce the an
 # Assignment 0: Using multilevel modelling to model hierarchical data
 In this assignment we will be investigating the _politeness_ dataset of Winter and Grawunder (2012) and apply basic methods of multilevel modelling. 
 
-## Indicating when the author changes
-  
-If you write this in a study group, clearly indicate when the author changes like this
-
---------------------------------------------------- *Name of author 1* ---------------------------------------------------  
-answering question 1
-
---------------------------------------------------- *Name of author 2* ---------------------------------------------------  
-answering question 2
-
 ## Dataset
 The dataset has been shared on GitHub, so make sure that the csv-file is on your current path. Otherwise you can supply the full path.
 
 ```{r, eval=FALSE}
-politeness <- read.csv('politeness.csv') ## read in data
+politeness <- read.csv('politeness.csv') # read in data
 ```
 
 # Exercises and objectives
 The objectives of the exercises of this assignment are:  
 1) Learning to recognize hierarchical structures within datasets and describing them  
 2) Creating simple multilevel models and assessing their fitness  
-3) Working both with linear predictors and categorical predictors 
+3) Working both with linear predictors and categorical predictors
 
 REMEMBER: In your report, make sure to include code that can reproduce the answers requested in the exercises below, i.e. make a knitted version  
 REMEMBER: This assignment will be part of your final portfolio
+
+--------------------------------------------------- *Iva* ---------------------------------------------------  
 
 ## Exercise A - describing the dataset and understanding the nature of its variables
 
@@ -56,6 +48,9 @@ REMEMBER: This assignment will be part of your final portfolio
     ii. now fit a similar model, but this time have _scenario_ be a nominal variable
     iii. judging from the residual variance, (_sigma(model)_), what difference does it make whether you encode _scenario_ as a categorical variable or as an integer variable? Why do you get the difference?
     iv. plot the model matrices, _X_, from the two models, using _image.plot_ from the _fields_ package; describe the two models, and describe the difference between the two kinds of models fitted from these plots  
+    
+--------------------------------------------------- *Florin* ---------------------------------------------------  
+
 3) Which variables should be indicated as nominal/categorical?  
     i. use _factor()_ to explicitly change these variables into the nominal/categorical category
     
@@ -67,11 +62,14 @@ REMEMBER: This assignment will be part of your final portfolio
     ii. for the partial-pooling model, add different intercepts for each _subject_ and compare the residual variance in this model with the remaining three  
     iii. how would you model a no-pooling model that took both _subject_ and _scenario_ into account?
     iv. each _subject_ was exposed to each _scenario_; what is the effect of using the second-level effect (1 + subject:scenario) with the first-level effects already modeled?
+    
+--------------------------------------------------- *Dori* ---------------------------------------------------  
 2) Plot a model for each subject, ignoring scenarios for now `total_duration ~ f0mn + (1 | subject)`
     i. create a plot with a subplot for each subject. This plot should contain the observed values for the dependent values and the fitted lines for each subject, ignoring differences in _scenarios_
     ii. describe what the plots and the model reveal about the relationship between _total_duration_ and _f0mn_
     iii. why do you think the slope is negative? (check the paper this is based on)
 
+--------------------------------------------------- *Alf* ---------------------------------------------------  
 
 ## Exercise C - pooling - categorical predictors
 
