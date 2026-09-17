@@ -74,10 +74,16 @@ REMEMBER: This assignment will be part of your final portfolio
 
 ## Exercise C - pooling - categorical predictors
 
-1) Fit a partial-pooling model with the dependent variable _f0mn_ and the independent variable _attitude_. For second-level effects, include intercepts for _subject_ and _scenario_
-    i. explain what the first-level effects say about the effect of attitude on fundamental frequency, _f0mn_, and explain what the two second level effects say about the variance around those group level effects
-    ii. also plot the _X_ and _Z_ matrices using _image.plot()_ (for the _Z_, you will have to apply _as.matrix()_ as _image.plot()_ does not handle sparse matrices). Explain what they mean
-    iii. fit an identical model, except that you remove _scenario_ from the second-level effects. For both models, find the std. errors associated with the group-level effect of attitude - how do they differ and why?
+1) Fit a partial-pooling model with the dependent variable _f0mn_ and the independent variable _attitude_. For second-level effects, include intercepts for _subject_ and _scenario_.
+
+```{r}
+
+```
+
+i. explain what the first-level effects say about the effect of attitude on fundamental frequency, _f0mn_, and explain what the two second level effects say about the variance around those group level effects
+ii. also plot the _X_ and _Z_ matrices using _image.plot()_ (for the _Z_, you will have to apply _as.matrix()_ as _image.plot()_ does not handle sparse matrices). Explain what they mean
+iii. fit an identical model, except that you remove _scenario_ from the second-level effects. For both models, find the std. errors associated with the group-level effect of attitude - how do they differ and why?
+
 2) Making the second-level effects more complicated -  now fit the two models with the formulas: `f0mn ~ attitude * gender + (1 | subject) + (1 | scenario)` and `f0mn ~ attitude * gender + (gender | subject) + (1 | scenario)` 
     i. Explain what each of the group-level effects and _subject_ and _scenario_ effects mean
     ii. compare the within-group standard deviation, $\hat\sigma_y$ between the two models - why don't they differ?
