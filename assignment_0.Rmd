@@ -81,6 +81,8 @@ partial_model <- lme4::lmer(
   f0mn ~ attitude + (1|subject) + (1|scenario),
   data = politeness # including both intercepts
   )
+
+summary(partial_model) # remember to delete this
 ```
 
 i. explain what the first-level effects say about the effect of attitude on fundamental frequency, _f0mn_, and explain what the two second level effects say about the variance around those group level effects
@@ -93,12 +95,14 @@ partial_model_coef <- coef(summary(partial_model)) #We get the coefficients
 
 partial_model_coef #we load the coefficients
 ```
-We can from this data see that attitude does have an impact on the fundamental frequency with a beta value of -14.72. We know the lmer function orders categorical data alphabetically, making the informal attitude be the intercept. We can therefore say that the first-level effects say that a change in attitude from being informal to polite makes fundamental frequency drop by -14.72 Hz.
+We can from this data see that attitude does have an impact on the fundamental frequency with a beta value of -14.72. We know the lmer function orders categorical data alphabetically, making the informal attitude be the intercept. We can therefore say that the first-level effects say that a change in attitude from being informal to polite makes fundamental frequency drop by 14.72 Hz.
+
+We now look at the random effects. 
 
 ```{r}
-VarCorr(partial_model)
+print(lme4::VarCorr(partial_model), comp = "Variance")
 ```
-
+We see that the variance of subjects lay around 4033 and 105 around scenario. 
 
 ii. also plot the _X_ and _Z_ matrices using _image.plot()_ (for the _Z_, you will have to apply _as.matrix()_ as _image.plot()_ does not handle sparse matrices). Explain what they mean
 iii. fit an identical model, except that you remove _scenario_ from the second-level effects. For both models, find the std. errors associated with the group-level effect of attitude - how do they differ and why?
