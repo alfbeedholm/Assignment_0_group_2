@@ -78,11 +78,9 @@ REMEMBER: This assignment will be part of your final portfolio
 
 ```{r}
 partial_model <- lme4::lmer(
-  f0mn ~ attitude + (1|subject) + (1|scenario),
-  data = politeness # including both intercepts
+  f0mn ~ attitude + (1|subject) + (1|scenario), # including both intercepts
+  data = politeness 
   )
-
-summary(partial_model) # remember to delete this
 ```
 
 i. explain what the first-level effects say about the effect of attitude on fundamental frequency, _f0mn_, and explain what the two second level effects say about the variance around those group level effects
@@ -102,13 +100,86 @@ We now look at the random effects.
 ```{r}
 print(lme4::VarCorr(partial_model), comp = "Variance")
 ```
-We see that the variance of subjects lay around 4033 and 105 around scenario. 
+We see that the variance of subjects lay around 4033 and 105 around scenario. So our data varies more between subjects than it does around the test scenario.
 
 ii. also plot the _X_ and _Z_ matrices using _image.plot()_ (for the _Z_, you will have to apply _as.matrix()_ as _image.plot()_ does not handle sparse matrices). Explain what they mean
+
+**Answer:**
+We will first get the values using the lme4 library
+```{r}
+library(fields)
+
+X <- lme4::getME(partial_model, "X")
+
+Z <- lme4::getME(partial_model, "Z")
+
+Z <- as.matrix(Z)
+
+image.plot(t(X)) # Transposing to make the our design matrix look more traditional
+image.plot(Z)
+```
+Our modelling of the X matrix shows us how our entire first column is made of 1s as intended with our second column made of the attitudes, either being 1 or 0 depending on if it is either a polite attitude or informal attitude. 
+
+The Z matrix holds two effects. It holds effects of both subject and scenario, as we modeled it to have. We can see how each subject, being each "step" of the big diagonal line" holds 1 values according to their attitude and have a corresponding scenario diagonal above according to the scenario that subject did at that moment. 
+
 iii. fit an identical model, except that you remove _scenario_ from the second-level effects. For both models, find the std. errors associated with the group-level effect of attitude - how do they differ and why?
 
+**Answer:**
+We write code to find the std. errors to compare.
+```{r}
+partial_model2 <- lme4::lmer(
+  f0mn ~ attitude + (1|subject), # now only including one second-level effect
+  data = politeness 
+  )
+print("Standard error of model with two second-level effects:")
+coef(summary(partial_model))[2,2]
+print("Standard error of model with one second-level effects:")
+coef(summary(partial_model2))[2,2]
+
+```
+We see a higher standard error for the model with only one second-level effect. This is potentially because more second-level effects allow for more between-group variation to be explained. 
+
+
 2) Making the second-level effects more complicated -  now fit the two models with the formulas: `f0mn ~ attitude * gender + (1 | subject) + (1 | scenario)` and `f0mn ~ attitude * gender + (gender | subject) + (1 | scenario)` 
-    i. Explain what each of the group-level effects and _subject_ and _scenario_ effects mean
-    ii. compare the within-group standard deviation, $\hat\sigma_y$ between the two models - why don't they differ?
-    iii. fit this model `f0mn ~ attitude * gender + (gender | subject) + (gender | scenario)`; why does it give a singular fit? and why would you expect this given the design of the study?
+
+**Answer:**
+We are fitting a more complicated model.
+
+```{r}
+complicated_model_1 <- lme4::lmer(f0mn ~ attitude * gender + (1 | subject) + (1 | scenario), data = politeness)
+
+complicated_model_2 <- lme4::lmer(f0mn ~ attitude * gender + (gender | subject) + (1 | scenario), data = politeness)
+```
+
+i. Explain what each of the group-level effects and _subject_ and _scenario_ effects mean
+**Answer:**
+The group-level effects in the first complicated model are quite similar to the less complicated model. They model how the intercept changes according to both subject and the scenario. In our case, the subject effect is grouping the data by the individual participant's data and the scenario is grouping the data by what the scenario, or essentially what trial, the data was taken in. 
+
+The second complicated model has group-level random effect of gender and subject, which means we are modelling if the difference in gender varies from subject to subject. Do note that a subject in this dataset is only allowed one gender, so this effect is seemingly statistically superfluous. In theory this effect would create a slope for each subject according to their different genders, but since there is only one gender per person, the model might be modelling something different.
+
+
+
+ii. compare the within-group standard deviation, $\hat\sigma_y$ between the two models - why don't they differ?
+**Answer:**
+First we will access the group-level effects for each model.
+```{r}
+print("The first complicated model")
+print(sigma(complicated_model_1))
+print("The second complicated model")
+print(sigma(complicated_model_2))
+```
+We see here virtually no difference here. This clearly showcases the problem with modelling the random effect slope of genders of individual subject, by showing how it is not able to explain more variance even though we should be adding more complexity. Where the first model has random intercepts for both subjects and scenarios to explain more variation, the second model also models the difference in gender for each subject. But since each subject only has one layer this is essentially the same as only modelling the random intercepts - hence why we see not real difference in standard deviation. 
+
+iii. fit this model `f0mn ~ attitude * gender + (gender | subject) + (gender | scenario)`; why does it give a singular fit? and why would you expect this given the design of the study?
+
+```{r}
+singular_fit_model <- lme4::lmer(f0mn ~ attitude * gender + (gender | subject) + (gender | scenario), data = politeness)
+
+lme4::isSingular(singular_fit_model) # checking if model is singular or near singular
+```
+
+This model gives a singular fit due to the "dimensions" of the variance-covariance matrix have estimates of exactly zero. This makes sense since our study only allows for one gender per subject and scenario, so all group-level effects in this scenario will break.
+
+## Needs better explanation
+
     
