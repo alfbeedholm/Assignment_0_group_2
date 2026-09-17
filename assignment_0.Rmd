@@ -53,8 +53,10 @@ REMEMBER: This assignment will be part of your final portfolio
 
 3) Which variables should be indicated as nominal/categorical?  
     i. use _factor()_ to explicitly change these variables into the nominal/categorical category
-    
+
 --------------------------------------------------- *Florin* ---------------------------------------------------  
+
+# Test sentence
 
 ## Exercise B - pooling - linear regression
 
