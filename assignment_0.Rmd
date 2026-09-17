@@ -56,21 +56,98 @@ REMEMBER: This assignment will be part of your final portfolio
 
 --------------------------------------------------- *Florin* ---------------------------------------------------  
 
-# Test sentence
+--------------------------------------------------- *Florin* ---------------------------------------------------
 
 ## Exercise B - pooling - linear regression
 
-1) Across _scenario's_, Do a no-pooling model, a complete-pooling model and a partial-pooling model with _total_duration_ as the dependent variable and *f0mn* as the independent variable. Model individual intercepts for each _scenario_ for the partial pooling and the no-pooling models
-    i. compare the residual variance between the three models - which results in explaining most variance?
-    ii. for the partial-pooling model, add different intercepts for each _subject_ and compare the residual variance in this model with the remaining three  
-    iii. how would you model a no-pooling model that took both _subject_ and _scenario_ into account?
-    iv. each _subject_ was exposed to each _scenario_; what is the effect of using the second-level effect (1 + subject:scenario) with the first-level effects already modeled?
+1)  Across *scenario's*, Do a no-pooling model, a complete-pooling model and a partial-pooling model with *total_duration* as the dependent variable and *f0mn* as the independent variable. Model individual intercepts for each *scenario* for the partial pooling and the no-pooling models
+
+```{r}
+df = politeness
+
+# Complete-pooling model
+cp_model <- lm(data = df, formula = total_duration ~ f0mn)
+
+# No-pooling model
+np_model <- lm(data = df, formula = total_duration ~ f0mn + scenario - 1)
+
+# Partial-pooling model
+pp_model <- lmer(data = df, formula = total_duration ~ f0mn + (1 | scenario))
+```
+
+i. compare the residual variance between the three models - which results in explaining most variance?
+
+```{r}
+  # We will define a function that compares model variance
+compare_var <- function(models, complete_comparison = TRUE){
+  # complete_comparison is to be set to FALSE when we want a quick answer
+  # regarding the least residual variance and not all of the variances
+  
+  min_var = Inf
+  for (model_name in names(models)){
+    model <- models[[model_name]]
+    var <- summary(model)$sigma^2
     
---------------------------------------------------- *Dori* ---------------------------------------------------  
-2) Plot a model for each subject, ignoring scenarios for now `total_duration ~ f0mn + (1 | subject)`
-    i. create a plot with a subplot for each subject. This plot should contain the observed values for the dependent values and the fitted lines for each subject, ignoring differences in _scenarios_
-    ii. describe what the plots and the model reveal about the relationship between _total_duration_ and _f0mn_
-    iii. why do you think the slope is negative? (check the paper this is based on)
+    # Outputs all residual variances if complete_comparison is TRUE
+    if(complete_comparison){
+      cat("Unexplained variance for the", model_name, "=", round(var,2), "\n")
+    }
+    
+    # Compares the variances to determine the lowest
+    if (var < min_var){
+      min_var <- var
+      best_model <- model_name
+    }
+  }
+  
+  cat("\nThe model that explains the most variance is the ", best_model, ".", sep="")
+  
+  # This returns only the minimum unexplained variance
+  if(!complete_comparison){
+    cat("\n\nUnexplained variance for", best_model, "=", round(min_var,2), "\n")
+  }
+}
+
+# We name the models in a list then call the function
+models <- list("complete-pooling model" = cp_model,
+               "no-pooling model" = np_model,
+               "partial-pooling model" = pp_model)
+compare_var(models)
+```
+
+ii. for the partial-pooling model, add different intercepts for each _subject_ and compare the residual variance in this model with the remaining three
+
+```{r}
+pp_model_new <- lmer(data = df,
+                 formula = total_duration ~ f0mn + (1 | scenario) + (1 | subject))
+
+models["partial-pooling model with different subjects intercepts"] <- pp_model_new
+compare_var(models, complete_comparison = FALSE)
+```
+
+Compared to the previous models, the partial-pooling model that includes random intercepts for both scenarios and subjects accounts for the most variance.
+
+iii. how would you model a no-pooling model that took both _subject_ and _scenario_ into account?
+
+```{r}
+np_model_new <- lm(data = df,
+                   formula = total_duration ~ f0mn + scenario - 1 + subject - 1)
+```
+
+iv. each _subject_ was exposed to each _scenario_; what is the effect of using the second-level effect (1 + subject:scenario) with the first-level effects already modeled?
+
+```{r}
+pp_model_newest <- lmer(data = df,
+                 formula = total_duration ~ f0mn + (1 | subject:scenario))
+
+models["(1+subject:scenario) model"] <- pp_model_newest
+compare_var(models, complete_comparison = FALSE)
+```
+
+  This model adds random intercepts for every subject x scenario combination and results in the lowest residual variation. However, because there are only 2 data points per subject x scenario combo, it runs a high risk of overfitting, hurting the degree to which it can be generalized to newer data.
+
+--------------------------------------------------- *Dori* ---------------------------------------------------\
+2) Plot a model for each subject, ignoring scenarios for now `total_duration ~ f0mn + (1 | subject)` i. create a plot with a subplot for each subject. This plot should contain the observed values for the dependent values and the fitted lines for each subject, ignoring differences in *scenarios* ii. describe what the plots and the model reveal about the relationship between *total_duration* and *f0mn* iii. why do you think the slope is negative? (check the paper this is based on)
 
 --------------------------------------------------- *Alf* ---------------------------------------------------  
 
