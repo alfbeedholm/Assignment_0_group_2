@@ -120,7 +120,7 @@ image.plot(Z)
 ```
 Our modelling of the X matrix shows us how our entire first column is made of 1s as intended with our second column made of the attitudes, either being 1 or 0 depending on if it is either a polite attitude or informal attitude. 
 
-The Z matrix holds two effects. It holds effects of both subject and scenario, as we modeled it to have. We can see how each subject, being each "step" of the big diagonal line" holds 1 values according to their attitude and have a corresponding scenario diagonal above according to the scenario that subject did at that moment. 
+The Z matrix holds two effects. It holds effects of both subject and scenario, as we modeled it to have. We can see how each subject, being each "step" of the big diagonal line" holds 1 values and all have a corresponding scenario represented through the diagonal - essentially being all the different scenarios that subject did. 
 
 iii. fit an identical model, except that you remove _scenario_ from the second-level effects. For both models, find the std. errors associated with the group-level effect of attitude - how do they differ and why?
 
@@ -137,7 +137,7 @@ print("Standard error of model with one second-level effects:")
 coef(summary(partial_model2))[2,2]
 
 ```
-We see a higher standard error for the model with only one second-level effect. This is potentially because more second-level effects allow for more between-group variation to be explained. 
+We see a higher standard error for the model with only one second-level effect. This is potentially because more second-level effects allow for more between-group variation to be explained, leaving less unexplained variance and therefore less standard error. 
 
 
 2) Making the second-level effects more complicated -  now fit the two models with the formulas: `f0mn ~ attitude * gender + (1 | subject) + (1 | scenario)` and `f0mn ~ attitude * gender + (gender | subject) + (1 | scenario)` 
@@ -155,9 +155,7 @@ i. Explain what each of the group-level effects and _subject_ and _scenario_ eff
 **Answer:**
 The group-level effects in the first complicated model are quite similar to the less complicated model. They model how the intercept changes according to both subject and the scenario. In our case, the subject effect is grouping the data by the individual participant's data and the scenario is grouping the data by what the scenario, or essentially what trial, the data was taken in. 
 
-The second complicated model has group-level random effect of gender and subject, which means we are modelling if the difference in gender varies from subject to subject. Do note that a subject in this dataset is only allowed one gender, so this effect is seemingly statistically superfluous. In theory this effect would create a slope for each subject according to their different genders, but since there is only one gender per person, the model might be modelling something different.
-
-
+The second complicated model has group-level random effect of gender and subject, which means we are modelling if the difference in gender varies from subject to subject. Do note that a subject in this dataset is only allowed one gender, making it a between-subject variable. Therefore, fitting the model to model how the effect of gender changes according to subject - thereby modelling a slope and intercept for each subject according to their different genders. But since there is only one gender per subject the gender slope is the same as just having a baseline, which only leaves the random intercept, and not really modelling any slope.
 
 ii. compare the within-group standard deviation, $\hat\sigma_y$ between the two models - why don't they differ?
 **Answer:**
@@ -178,8 +176,6 @@ singular_fit_model <- lme4::lmer(f0mn ~ attitude * gender + (gender | subject) +
 lme4::isSingular(singular_fit_model) # checking if model is singular or near singular
 ```
 
-This model gives a singular fit due to the "dimensions" of the variance-covariance matrix have estimates of exactly zero. This makes sense since our study only allows for one gender per subject and scenario, so all group-level effects in this scenario will break.
-
-## Needs better explanation
+This model gives a singular fit due to the "dimensions" of the variance-covariance matrix have estimates of exactly zero. This makes sense since our study only allows for one gender per subject, as explained earlier, but doesn't explain all of it since our earlier model was able to handle it. The last push towards our singular fit here might then be caused by the added (gender | scenario) random effect, since our scenario variable only holds 7 and we are now asking the model to compute the scenario-level intercepts, scenario-level slopes relative to gender, although it is possible, and their correlation - it turns into a lot of different parameters to be computed, but we only have 7 different scenarios to do it with. 
 
     
