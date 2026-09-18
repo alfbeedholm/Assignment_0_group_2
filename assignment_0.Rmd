@@ -54,6 +54,7 @@ REMEMBER: This assignment will be part of your final portfolio
     iii. judging from the residual variance, (*sigma(model)*), what difference does it make whether you encode *scenario* as a categorical variable or as an integer variable? Why do you get the difference?
     iv. plot the model matrices, *X*, from the two models, using *image.plot* from the *fields* package; describe the two models, and describe the difference between the two kinds of models fitted from these plots
 
+<<<<<<< HEAD
 --------------------------------------------------- *Dori* ---------------------------------------------------
 
 3)  Which variables should be indicated as nominal/categorical?
@@ -68,6 +69,14 @@ factor(politness$gender)
 
 
 --------------------------------------------------- *Florin* ---------------------------------------------------
+=======
+3) Which variables should be indicated as nominal/categorical?  
+    i. use _factor()_ to explicitly change these variables into the nominal/categorical category
+
+--------------------------------------------------- *Florin* ---------------------------------------------------  
+>>>>>>> 8ab25c7a596d9e57eacff844e054a1c8d69adf9e
+
+# Test sentence
 
 ## Exercise B - pooling - linear regression
 
