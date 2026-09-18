@@ -62,9 +62,11 @@ REMEMBER: This assignment will be part of your final portfolio
     i.  use *factor()* to explicitly change these variables into the nominal/categorical category
 Nominal/categorical variables are the ones that can be sorted into different groups, but have no inherent ranking/order between them.
 ```{r}
-factor(politeness$attitude)
-factor(politeness$scenario)
-factor(politness$gender)
+politeness$attitude <- factor(politeness$attitude)
+politeness$scenario <- factor(politeness$scenario)
+politeness$gender <- factor(politeness$gender)
+
+class(politeness$attitude)
 ```
 
 
