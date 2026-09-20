@@ -175,7 +175,4 @@ singular_fit_model <- lme4::lmer(f0mn ~ attitude * gender + (gender | subject) +
 
 lme4::isSingular(singular_fit_model) # checking if model is singular or near singular
 ```
-
 This model gives a singular fit due to the "dimensions" of the variance-covariance matrix have estimates of exactly zero. This makes sense since our study only allows for one gender per subject, as explained earlier, but doesn't explain all of it since our earlier model was able to handle it. The last push towards our singular fit here might then be caused by the added (gender | scenario) random effect, since our scenario variable only holds 7 and we are now asking the model to compute the scenario-level intercepts, scenario-level slopes relative to gender, although it is possible, and their correlation - it turns into a lot of different parameters to be computed, but we only have 7 different scenarios to do it with. 
-
-    
