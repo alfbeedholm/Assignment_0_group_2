@@ -43,12 +43,158 @@ REMEMBER: This assignment will be part of your final portfolio
     i. in this description, categorise the 7 variables into either nominal, ordinal, interval or ratio  
     ii. include number of observations and missing observations  
     iii. what do you think are the response variables, i.e. what could work as *y* in fitting models?
+    
+```{r}
+str(politeness)
+
+```
+
+```{r}
+n_total <- nrow(politeness)
+missing_counts <- colSums(is.na(politeness))
+missing_counts
+```
+
+```{r}
+table(politeness$subject)
+table(politeness$scenario)
+table(politeness$attitude)
+table(politeness$gender)
+```
+
+```{r}
+
+var_table <- data.frame(
+  
+  Variable = c("subject", "gender", "scenario", "attitude", "total_duration", "f0mn", "hiss_count"),
+  
+  Description = c(
+    "An identifier for each participant.",
+    "The gender of each participant.",
+    "The condition type the participant was exposed to",
+    "Speech register condition: polite/formal (pol) vs. informal (inf)",
+    "How long the utterance lasted.",
+    "Mean fundamental frequency of the utterance in Hz; acoustic correlate of pitch.",
+    "Number of noisy breath intakes."
+  ),
+  
+  Type = c(
+    "nominal",
+    "nominal",
+    "nominal",
+    "nominal",
+    "ratio",
+    "ratio",
+    "ratio"
+  ),
+  
+  N = n_total,
+  
+  Missing = c(
+    missing_counts["subject"],
+    missing_counts["gender"],
+    missing_counts["scenario"],
+    missing_counts["attitude"],
+    missing_counts["total_duration"],
+    missing_counts["f0mn"],
+    missing_counts["hiss_count"]
+  ),
+  
+   "Role in models" = c(
+    "grouping variable",
+    "predictor",
+    "predictor",
+    "predictor",
+    "response variable (can be a predictor)",
+    "response variable (can be a predictor)",
+    "response variable (can be a predictor)"
+  ),
+  check.names = FALSE
+)
+
+knitr::kable(var_table, caption = "Description of variables in the politeness dataset", row.names = FALSE)
+```
+
+The presented dataset is the *politeness* dataset from Winter and Grawunder (2012). It contains 224 observations (utterances) and includes 16 subjects (8 female, 8 male).
+
+The data is hierarchical: utterances are nested within subjects, and crossed with 7 different scenarios and 2 attitude conditions. See the table above for a summary of the variables.
+
+The variables *subject*, *gender*, *scenario*, and *attitude* are nominal because they are labels or categories with no inherent order (e.g., for *scenario* the numbers 1-7 are just labels for different interaction types, and not a continuous scale).
+
+The variables *total_duration*, *f0mn*, and *hiss_count* are ratio variables because they are continuous measurements with a true.
+
+While there are 224 total observations, *f0mn* has 12 missing values, which means that any model using *f0mn* as the response will effectively use 212 observations.
+
+The primary response variables in this study are *f0mn*, *total_duration* and *hiss_count* because these are the measured acoustic outcomes of the speech. The other variables are predictors or grouping variables that explain the variation in those responses.
+    
 2) Do some analyses with *scenario* as an independent variable  
     i. fit a multilevel model with _f0mn_ as the dependent variable and *scenario* as the independent variable. Model different intercepts for each _subject_
+    
+```{r}
+
+#checking how scenario is currently stored as
+class(politeness$scenario)
+table(politeness$scenario)
+
+```
+
+```{r}
+
+# Model, in which scenario is plotted as numeric
+m_num <- lme4::lmer(f0mn ~ scenario + (1 | subject), data = politeness)
+
+m_num
+```
+
     ii. now fit a similar model, but this time have _scenario_ be a nominal variable
+    
+```{r}
+# Model, in which scenario is plotted as nominal
+
+m_nom <- lme4::lmer(f0mn ~ factor(scenario) + (1 | subject), data = politeness)
+
+m_nom
+```
+
     iii. judging from the residual variance, (_sigma(model)_), what difference does it make whether you encode _scenario_ as a categorical variable or as an integer variable? Why do you get the difference?
+    
+```{r}
+# Checking sigma for each model
+sigma(m_num)
+sigma(m_nom)
+```
+
+The residual standard deviation for the numerical model was 32.11, while for the nominal model it was 30.67. This indicates that the nominal model explains slightly more variance in f0mn than the numerical model. This maybe so because the numerical model forces a single linear trend across scenrios 1-7. IF the true relationship between *scenario* and *f0mn* is not such straight line, the numerical model will leave more unexplained variance. THe nominal model allows for more flexibility by estimating a separate intercept for each scenario, therefore reducing the residual standard deviation.
+
     iv. plot the model matrices, _X_, from the two models, using _image.plot_ from the _fields_ package; describe the two models, and describe the difference between the two kinds of models fitted from these plots  
     
+    ```{r}
+X_num <- model.matrix(m_num)
+X_nom <- model.matrix(m_nom)
+
+dim(X_num)
+dim(X_nom)
+
+```
+
+```{r}
+fields::image.plot(t(X_nom),
+                   main = "X matrix: scenario as nominal",
+                   xlab = "Observations (n = 212)",
+                   ylab = "Variables")
+
+fields::image.plot(t(X_num), 
+           main = "X matrix: scenario as numerical",
+           xlab = "Observations (n = 212)",
+           ylab = "Variables")
+```
+
+We transposed the model matrices before the visualization to make the structure clearer. The first model (X_num) treats *scenario* as a numerical variable. In the plot the y-axis represents the rows (the 212 observations) and the x-axis represents the columns (variables). The plot shows 2 bands. The solid purple band is the Intercept (solid because it is always 1). The other band is the *scenario* variable, which shows a gradient of colors, which represent the numbers 1 to 7. This means that the numerical model estimates a single linear slope for scenario.
+
+The second model (X_nom) treats *scenario* as a nominal variable. The plot shows 7 bands. The solid band (this time in red) is again the Intercept. The six remaining bands are dummy variables for scenarios 2-7. They onlyy consist of 0s and 1s, which indicates that the model estimates a separate intercept for each scenario rather than a single slope.
+
+**The difference between the models** The numerical model uses only 1 parameter for scenario and therefore assumes a straignt-line relationship, while the nominal model uses 6 parameters, which allows each scenario to have its own independent mean. This explains the residual variance: the nominal model can fit the data more loosely because it is more flexible, but requires estimating 5 additional parameters.
+
 --------------------------------------------------- *Dori* ---------------------------------------------------  
 
 3) Which variables should be indicated as nominal/categorical?  
