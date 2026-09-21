@@ -4,22 +4,26 @@ date: "2026-09-17"
 output: pdf_document
 ---
 
+```{=html}
 <style type="text/css">
   body{
   font-size: 14pt;
 }
 </style>
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-REMEMBER: In your portfolio, make sure to include code that can reproduce the answers requested in the exercises below (__MAKE A KNITTED VERSION__). If it does not KNIT, it cannot be part of your portfolio
+REMEMBER: In your portfolio, make sure to include code that can reproduce the answers requested in the exercises below (**MAKE A KNITTED VERSION**). If it does not KNIT, it cannot be part of your portfolio
 
 # Assignment 0: Using multilevel modelling to model hierarchical data
-In this assignment we will be investigating the _politeness_ dataset of Winter and Grawunder (2012) and apply basic methods of multilevel modelling. 
+
+In this assignment we will be investigating the *politeness* dataset of Winter and Grawunder (2012) and apply basic methods of multilevel modelling.
 
 ## Dataset
+
 The dataset has been shared on GitHub, so make sure that the csv-file is on your current path. Otherwise you can supply the full path.
 
 ```{r, eval=FALSE}
@@ -27,23 +31,24 @@ politeness <- read.csv('politeness.csv') # read in data
 ```
 
 # Exercises and objectives
-The objectives of the exercises of this assignment are:  
-1) Learning to recognize hierarchical structures within datasets and describing them  
-2) Creating simple multilevel models and assessing their fitness  
+
+The objectives of the exercises of this assignment are:\
+1) Learning to recognize hierarchical structures within datasets and describing them\
+2) Creating simple multilevel models and assessing their fitness\
 3) Working both with linear predictors and categorical predictors
 
-REMEMBER: In your report, make sure to include code that can reproduce the answers requested in the exercises below, i.e. make a knitted version  
+REMEMBER: In your report, make sure to include code that can reproduce the answers requested in the exercises below, i.e. make a knitted version\
 REMEMBER: This assignment will be part of your final portfolio
 
---------------------------------------------------- *Iva* ---------------------------------------------------  
+--------------------------------------------------- *Iva* ---------------------------------------------------
 
 ## Exercise A - describing the dataset and understanding the nature of its variables
 
-1) Describe the dataset, such that someone who happened upon this dataset could understand the 7 variables and what they contain.  This article,https://www.sciencedirect.com/science/article/pii/S0095447012000666,  might help (see Table 1)
-    i. in this description, categorise the 7 variables into either nominal, ordinal, interval or ratio  
-    ii. include number of observations and missing observations  
+1)  Describe the dataset, such that someone who happened upon this dataset could understand the 7 variables and what they contain. This article,<https://www.sciencedirect.com/science/article/pii/S0095447012000666>, might help (see Table 1)
+    i.  in this description, categorise the 7 variables into either nominal, ordinal, interval or ratio\
+    ii. include number of observations and missing observations\
     iii. what do you think are the response variables, i.e. what could work as *y* in fitting models?
-    
+
 ```{r}
 str(politeness)
 
@@ -121,15 +126,15 @@ The data is hierarchical: utterances are nested within subjects, and crossed wit
 
 The variables *subject*, *gender*, *scenario*, and *attitude* are nominal because they are labels or categories with no inherent order (e.g., for *scenario* the numbers 1-7 are just labels for different interaction types, and not a continuous scale).
 
-The variables *total_duration*, *f0mn*, and *hiss_count* are ratio variables because they are continuous measurements with a true.
+The variables *total_duration*, *f0mn*, and *hiss_count* are ratio variables because they are continuous measurements with a true 0.
 
 While there are 224 total observations, *f0mn* has 12 missing values, which means that any model using *f0mn* as the response will effectively use 212 observations.
 
 The primary response variables in this study are *f0mn*, *total_duration* and *hiss_count* because these are the measured acoustic outcomes of the speech. The other variables are predictors or grouping variables that explain the variation in those responses.
-    
-2) Do some analyses with *scenario* as an independent variable  
-    i. fit a multilevel model with _f0mn_ as the dependent variable and *scenario* as the independent variable. Model different intercepts for each _subject_
-    
+
+2)  Do some analyses with *scenario* as an independent variable
+    i.  fit a multilevel model with *f0mn* as the dependent variable and *scenario* as the independent variable. Model different intercepts for each *subject*
+
 ```{r}
 
 #checking how scenario is currently stored as
@@ -146,8 +151,10 @@ m_num <- lme4::lmer(f0mn ~ scenario + (1 | subject), data = politeness)
 m_num
 ```
 
-    ii. now fit a similar model, but this time have _scenario_ be a nominal variable
-    
+```         
+ii. now fit a similar model, but this time have _scenario_ be a nominal variable
+```
+
 ```{r}
 # Model, in which scenario is plotted as nominal
 
@@ -156,19 +163,23 @@ m_nom <- lme4::lmer(f0mn ~ factor(scenario) + (1 | subject), data = politeness)
 m_nom
 ```
 
-    iii. judging from the residual variance, (_sigma(model)_), what difference does it make whether you encode _scenario_ as a categorical variable or as an integer variable? Why do you get the difference?
-    
+```         
+iii. judging from the residual variance, (_sigma(model)_), what difference does it make whether you encode _scenario_ as a categorical variable or as an integer variable? Why do you get the difference?
+```
+
 ```{r}
 # Checking sigma for each model
 sigma(m_num)
 sigma(m_nom)
 ```
 
-The residual standard deviation for the numerical model was 32.11, while for the nominal model it was 30.67. This indicates that the nominal model explains slightly more variance in f0mn than the numerical model. This maybe so because the numerical model forces a single linear trend across scenrios 1-7. IF the true relationship between *scenario* and *f0mn* is not such straight line, the numerical model will leave more unexplained variance. THe nominal model allows for more flexibility by estimating a separate intercept for each scenario, therefore reducing the residual standard deviation.
+The residual standard deviation for the numerical model was 32.11, while for the nominal model it was 30.67. This indicates that the nominal model explains slightly more variance in f0mn than the numerical model. This may be so because the numerical model forces a single linear trend across scenarios 1-7. If the true relationship between *scenario* and *f0mn* is not such straight line, the numerical model will leave more unexplained variance. The nominal model allows for more flexibility by estimating a separate intercept for each scenario, therefore reducing the residual standard deviation.
 
-    iv. plot the model matrices, _X_, from the two models, using _image.plot_ from the _fields_ package; describe the two models, and describe the difference between the two kinds of models fitted from these plots  
-    
-    ```{r}
+```         
+iv. plot the model matrices, _X_, from the two models, using _image.plot_ from the _fields_ package; describe the two models, and describe the difference between the two kinds of models fitted from these plots  
+```
+
+```{r}
 X_num <- model.matrix(m_num)
 X_nom <- model.matrix(m_nom)
 
@@ -180,54 +191,50 @@ dim(X_nom)
 ```{r}
 fields::image.plot(t(X_nom),
                    main = "X matrix: scenario as nominal",
-                   xlab = "Observations (n = 212)",
-                   ylab = "Variables")
+                   xlab = "Variables",
+                   ylab = "Observations (n = 212)")
 
 fields::image.plot(t(X_num), 
            main = "X matrix: scenario as numerical",
-           xlab = "Observations (n = 212)",
-           ylab = "Variables")
+           xlab = "Variables",
+           ylab = "Observations (n = 212)")
 ```
 
 We transposed the model matrices before the visualization to make the structure clearer. The first model (X_num) treats *scenario* as a numerical variable. In the plot the y-axis represents the rows (the 212 observations) and the x-axis represents the columns (variables). The plot shows 2 bands. The solid purple band is the Intercept (solid because it is always 1). The other band is the *scenario* variable, which shows a gradient of colors, which represent the numbers 1 to 7. This means that the numerical model estimates a single linear slope for scenario.
 
-The second model (X_nom) treats *scenario* as a nominal variable. The plot shows 7 bands. The solid band (this time in red) is again the Intercept. The six remaining bands are dummy variables for scenarios 2-7. They onlyy consist of 0s and 1s, which indicates that the model estimates a separate intercept for each scenario rather than a single slope.
+The second model (X_nom) treats *scenario* as a nominal variable. The plot shows 7 bands. The solid band (this time in red) is again the Intercept. The six remaining bands are dummy variables for scenarios 2-7. They only consist of 0s and 1s, which indicates that the model estimates a separate intercept for each scenario rather than a single slope.
 
-**The difference between the models** The numerical model uses only 1 parameter for scenario and therefore assumes a straignt-line relationship, while the nominal model uses 6 parameters, which allows each scenario to have its own independent mean. This explains the residual variance: the nominal model can fit the data more loosely because it is more flexible, but requires estimating 5 additional parameters.
+**The difference between the models:** The numerical model uses only 1 parameter for scenario and therefore assumes a straight-line relationship, while the nominal model uses 6 parameters, which allows each scenario to have its own independent mean. This explains the residual variance: the nominal model can fit the data more loosely because it is more flexible, but requires estimating 6 additional parameters.
 
---------------------------------------------------- *Dori* ---------------------------------------------------  
+--------------------------------------------------- *Dori* ---------------------------------------------------
 
-3) Which variables should be indicated as nominal/categorical?  
-    i. use _factor()_ to explicitly change these variables into the nominal/categorical category
+3)  Which variables should be indicated as nominal/categorical?
+    i.  use *factor()* to explicitly change these variables into the nominal/categorical category
 
---------------------------------------------------- *Florin* ---------------------------------------------------  
+--------------------------------------------------- *Florin* ---------------------------------------------------
 
 # Test sentence
 
 ## Exercise B - pooling - linear regression
 
-1) Across _scenario's_, Do a no-pooling model, a complete-pooling model and a partial-pooling model with _total_duration_ as the dependent variable and *f0mn* as the independent variable. Model individual intercepts for each _scenario_ for the partial pooling and the no-pooling models
-    i. compare the residual variance between the three models - which results in explaining most variance?
-    ii. for the partial-pooling model, add different intercepts for each _subject_ and compare the residual variance in this model with the remaining three  
-    iii. how would you model a no-pooling model that took both _subject_ and _scenario_ into account?
-    iv. each _subject_ was exposed to each _scenario_; what is the effect of using the second-level effect (1 + subject:scenario) with the first-level effects already modeled?
-    
---------------------------------------------------- *Dori* ---------------------------------------------------  
-2) Plot a model for each subject, ignoring scenarios for now `total_duration ~ f0mn + (1 | subject)`
-    i. create a plot with a subplot for each subject. This plot should contain the observed values for the dependent values and the fitted lines for each subject, ignoring differences in _scenarios_
-    ii. describe what the plots and the model reveal about the relationship between _total_duration_ and _f0mn_
-    iii. why do you think the slope is negative? (check the paper this is based on)
+1)  Across *scenario's*, Do a no-pooling model, a complete-pooling model and a partial-pooling model with *total_duration* as the dependent variable and *f0mn* as the independent variable. Model individual intercepts for each *scenario* for the partial pooling and the no-pooling models
+    i.  compare the residual variance between the three models - which results in explaining most variance?
+    ii. for the partial-pooling model, add different intercepts for each *subject* and compare the residual variance in this model with the remaining three\
+    iii. how would you model a no-pooling model that took both *subject* and *scenario* into account?
+    iv. each *subject* was exposed to each *scenario*; what is the effect of using the second-level effect (1 + subject:scenario) with the first-level effects already modeled?
 
---------------------------------------------------- *Alf* ---------------------------------------------------  
+--------------------------------------------------- *Dori* ---------------------------------------------------\
+2) Plot a model for each subject, ignoring scenarios for now `total_duration ~ f0mn + (1 | subject)` i. create a plot with a subplot for each subject. This plot should contain the observed values for the dependent values and the fitted lines for each subject, ignoring differences in *scenarios* ii. describe what the plots and the model reveal about the relationship between *total_duration* and *f0mn* iii. why do you think the slope is negative? (check the paper this is based on)
+
+--------------------------------------------------- *Alf* ---------------------------------------------------
 
 ## Exercise C - pooling - categorical predictors
 
-1) Fit a partial-pooling model with the dependent variable _f0mn_ and the independent variable _attitude_. For second-level effects, include intercepts for _subject_ and _scenario_
-    i. explain what the first-level effects say about the effect of attitude on fundamental frequency, _f0mn_, and explain what the two second level effects say about the variance around those group level effects
-    ii. also plot the _X_ and _Z_ matrices using _image.plot()_ (for the _Z_, you will have to apply _as.matrix()_ as _image.plot()_ does not handle sparse matrices). Explain what they mean
-    iii. fit an identical model, except that you remove _scenario_ from the second-level effects. For both models, find the std. errors associated with the group-level effect of attitude - how do they differ and why?
-2) Making the second-level effects more complicated -  now fit the two models with the formulas: `f0mn ~ attitude * gender + (1 | subject) + (1 | scenario)` and `f0mn ~ attitude * gender + (gender | subject) + (1 | scenario)` 
-    i. Explain what each of the group-level effects and _subject_ and _scenario_ effects mean
+1)  Fit a partial-pooling model with the dependent variable *f0mn* and the independent variable *attitude*. For second-level effects, include intercepts for *subject* and *scenario*
+    i.  explain what the first-level effects say about the effect of attitude on fundamental frequency, *f0mn*, and explain what the two second level effects say about the variance around those group level effects
+    ii. also plot the *X* and *Z* matrices using *image.plot()* (for the *Z*, you will have to apply *as.matrix()* as *image.plot()* does not handle sparse matrices). Explain what they mean
+    iii. fit an identical model, except that you remove *scenario* from the second-level effects. For both models, find the std. errors associated with the group-level effect of attitude - how do they differ and why?
+2)  Making the second-level effects more complicated - now fit the two models with the formulas: `f0mn ~ attitude * gender + (1 | subject) + (1 | scenario)` and `f0mn ~ attitude * gender + (gender | subject) + (1 | scenario)`
+    i.  Explain what each of the group-level effects and *subject* and *scenario* effects mean
     ii. compare the within-group standard deviation, $\hat\sigma_y$ between the two models - why don't they differ?
     iii. fit this model `f0mn ~ attitude * gender + (gender | subject) + (gender | scenario)`; why does it give a singular fit? and why would you expect this given the design of the study?
-    
