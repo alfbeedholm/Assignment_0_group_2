@@ -51,6 +51,25 @@ REMEMBER: This assignment will be part of your final portfolio
 
 ```{r}
 str(politeness)
+--------------------------------------------------- *Dori* ---------------------------------------------------
+
+3)  Which variables should be indicated as nominal/categorical?
+
+    i.  use *factor()* to explicitly change these variables into the nominal/categorical category
+Nominal/categorical variables are the ones that can be sorted into different groups, but have no inherent ranking/order between them.
+```{r}
+politeness$attitude <- factor(politeness$attitude)
+politeness$scenario <- factor(politeness$scenario)
+politeness$gender <- factor(politeness$gender)
+
+```
+
+
+--------------------------------------------------- *Florin* ---------------------------------------------------
+=======
+3) Which variables should be indicated as nominal/categorical?  
+    i. use _factor()_ to explicitly change these variables into the nominal/categorical category
+>>>>>>> origin/Dori_exercises
 
 ```
 
@@ -262,8 +281,6 @@ loosely because it is more flexible, but requires estimating 6 additional parame
 
 --------------------------------------------------- *Florin* ---------------------------------------------------
 
-# Test sentence
-
 ## Exercise B - pooling - linear regression
 
 1)  Across *scenario's*, Do a no-pooling model, a complete-pooling model and a partial-pooling model with *total_duration* as the dependent variable and *f0mn* as the independent variable. Model individual intercepts for each *scenario* for the partial pooling and the no-pooling models
@@ -275,6 +292,46 @@ loosely because it is more flexible, but requires estimating 6 additional parame
 --------------------------------------------------- *Dori* ---------------------------------------------------\
 2) Plot a model for each subject, ignoring scenarios for now `total_duration ~ f0mn + (1 | subject)` i. create a plot with a subplot for each subject. This plot should contain the observed values for the dependent values and the fitted lines for each subject, ignoring differences in *scenarios* ii. describe what the plots and the model reveal about the relationship between *total_duration* and *f0mn* iii. why do you think the slope is negative? (check the paper this is based on)
 
+<<<<<<< HEAD
+=======
+```{r}
+library(lme4)
+library(tidyverse)
+
+# removing rows with NAs from the dataframe as we're working with f0mn, where the NAs are
+politeness_no_na <- politeness %>% drop_na()
+subj_model <- lmer(total_duration ~ f0mn + (1|subject), data = politeness_no_na)
+fixef(subj_model)
+
+# adding the predicted y values to a new dataframe
+politeness_yhat <- politeness_no_na %>% 
+  mutate(pred = fitted(subj_model))
+
+# plotting the data with color coding by subject
+ggplot(data = politeness_yhat, aes(x = f0mn, y = total_duration, color = subject)) + 
+  geom_point() +
+  xlab("Fundamental Frequency (Hz)") +
+  ylab("Total Duration (seconds)") +
+  geom_line(aes(y = pred))
+```
+
+**Short description of what the model does**: We are predicting total duration 
+of the acoustic signal by looking at its fundamental frequency; we are letting 
+the intercepts vary for each participant, while keeping their slopes constant.
+
+**Relationship between total duration and fundamental frequency**: From fixed 
+effects section of output:  A 0.0866 Hz decrease in fundamental frequency can be 
+observed per second increase in duration (similar result from plot). Therefore, 
+there is a negative correlation between total duration and 
+fundamental frequency. Acoustic signals with longer duration generally have 
+lower frequencies. 
+
+**Why the slope is negative**: According to the paper, participants spoke on 
+average 0.38 ± 0.18 syllables per second slower in the formal condition; 
+and since the fundamental frequency was also found to be lower in the 
+formal condition, the negative slope makes sense.
+
+>>>>>>> origin/Dori_exercises
 --------------------------------------------------- *Alf* ---------------------------------------------------
 
 ## Exercise C - pooling - categorical predictors
