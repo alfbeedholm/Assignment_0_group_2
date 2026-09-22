@@ -14,7 +14,6 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(tidyverse, fields)
 ```
 
 REMEMBER: In your portfolio, make sure to include code that can reproduce the answers requested in the exercises below (**MAKE A KNITTED VERSION**). If it does not KNIT, it cannot be part of your portfolio
@@ -52,25 +51,6 @@ REMEMBER: This assignment will be part of your final portfolio
 
 ```{r}
 str(politeness)
---------------------------------------------------- *Dori* ---------------------------------------------------
-
-3)  Which variables should be indicated as nominal/categorical?
-
-    i.  use *factor()* to explicitly change these variables into the nominal/categorical category
-Nominal/categorical variables are the ones that can be sorted into different groups, but have no inherent ranking/order between them.
-```{r}
-politeness$attitude <- factor(politeness$attitude)
-politeness$scenario <- factor(politeness$scenario)
-politeness$gender <- factor(politeness$gender)
-
-```
-
-
---------------------------------------------------- *Florin* ---------------------------------------------------
-=======
-3) Which variables should be indicated as nominal/categorical?  
-    i. use _factor()_ to explicitly change these variables into the nominal/categorical category
->>>>>>> origin/Dori_exercises
 
 ```
 
@@ -279,20 +259,18 @@ loosely because it is more flexible, but requires estimating 6 additional parame
 
 3)  Which variables should be indicated as nominal/categorical?
     i.  use *factor()* to explicitly change these variables into the nominal/categorical category
+```{r}
+politeness$attitude <- factor(politeness$attitude)
+politeness$scenario <- factor(politeness$scenario)
+politeness$gender <- factor(politeness$gender)
 
-=======
->>>>>>> origin/Florins_branch
+```
+
 --------------------------------------------------- *Florin* ---------------------------------------------------
 
 ## Exercise B - pooling - linear regression
 
 1)  Across *scenario's*, Do a no-pooling model, a complete-pooling model and a partial-pooling model with *total_duration* as the dependent variable and *f0mn* as the independent variable. Model individual intercepts for each *scenario* for the partial pooling and the no-pooling models
-<<<<<<< HEAD
-    i.  compare the residual variance between the three models - which results in explaining most variance?
-    ii. for the partial-pooling model, add different intercepts for each *subject* and compare the residual variance in this model with the remaining three\
-    iii. how would you model a no-pooling model that took both *subject* and *scenario* into account?
-    iv. each *subject* was exposed to each *scenario*; what is the effect of using the second-level effect (1 + subject:scenario) with the first-level effects already modeled?
-=======
 
 ```{r}
 df = politeness
@@ -380,8 +358,6 @@ compare_var(models, complete_comparison = FALSE)
 --------------------------------------------------- *Dori* ---------------------------------------------------\
 2) Plot a model for each subject, ignoring scenarios for now `total_duration ~ f0mn + (1 | subject)` i. create a plot with a subplot for each subject. This plot should contain the observed values for the dependent values and the fitted lines for each subject, ignoring differences in *scenarios* ii. describe what the plots and the model reveal about the relationship between *total_duration* and *f0mn* iii. why do you think the slope is negative? (check the paper this is based on)
 
-<<<<<<< HEAD
-=======
 ```{r}
 library(lme4)
 library(tidyverse)
@@ -419,20 +395,10 @@ average 0.38 ± 0.18 syllables per second slower in the formal condition;
 and since the fundamental frequency was also found to be lower in the 
 formal condition, the negative slope makes sense.
 
->>>>>>> origin/Dori_exercises
 --------------------------------------------------- *Alf* ---------------------------------------------------
 
 ## Exercise C - pooling - categorical predictors
 
-1)  Fit a partial-pooling model with the dependent variable *f0mn* and the independent variable *attitude*. For second-level effects, include intercepts for *subject* and *scenario*
-    i.  explain what the first-level effects say about the effect of attitude on fundamental frequency, *f0mn*, and explain what the two second level effects say about the variance around those group level effects
-    ii. also plot the *X* and *Z* matrices using *image.plot()* (for the *Z*, you will have to apply *as.matrix()* as *image.plot()* does not handle sparse matrices). Explain what they mean
-    iii. fit an identical model, except that you remove *scenario* from the second-level effects. For both models, find the std. errors associated with the group-level effect of attitude - how do they differ and why?
-2)  Making the second-level effects more complicated - now fit the two models with the formulas: `f0mn ~ attitude * gender + (1 | subject) + (1 | scenario)` and `f0mn ~ attitude * gender + (gender | subject) + (1 | scenario)`
-    i.  Explain what each of the group-level effects and *subject* and *scenario* effects mean
-    ii. compare the within-group standard deviation, $\hat\sigma_y$ between the two models - why don't they differ?
-    iii. fit this model `f0mn ~ attitude * gender + (gender | subject) + (gender | scenario)`; why does it give a singular fit? and why would you expect this given the design of the study?
-=======
 1) Fit a partial-pooling model with the dependent variable _f0mn_ and the independent variable _attitude_. For second-level effects, include intercepts for _subject_ and _scenario_.
 
 ```{r}
@@ -466,25 +432,16 @@ ii. also plot the _X_ and _Z_ matrices using _image.plot()_ (for the _Z_, you wi
 **Answer:**
 We will first get the values using the lme4 library
 ```{r}
+library(fields)
+
 X <- lme4::getME(partial_model, "X")
 
 Z <- lme4::getME(partial_model, "Z")
 
 Z <- as.matrix(Z)
 
-subjects <- politeness |> group_by(subject)
-
-fields::image.plot(x = 1:dim(X)[2], y = 1:dim(X)[1], t(X), # Transposing to make the our 
-           #design matrix look more traditional
-           xlab = "Predictors", ylab = "Observations (n = 212)", xaxt = 'n',
-           main = "Design matrix for partial model",
-           legend.lab = "Weight") 
-axis(1, 1:dim(X)[2], c('Intercept', 'Slope'))
-
-fields::image.plot(Z,
-           xlab = "Number of random effects (q)", ylab = "Number of observations (n = 16)",
-           main = "Pattern of Z matrix",
-           legend.lab = "Weight")
+image.plot(t(X)) # Transposing to make the our design matrix look more traditional
+image.plot(Z)
 ```
 Our modelling of the X matrix shows us how our entire first column is made of 1s as intended with our second column made of the attitudes, either being 1 or 0 depending on if it is either a polite attitude or informal attitude. 
 
@@ -514,15 +471,9 @@ We see a higher standard error for the model with only one second-level effect. 
 We are fitting a more complicated model.
 
 ```{r}
-complicated_model_1 <- lme4::lmer(f0mn ~ attitude * gender +
-                                    (1 | subject) +
-                                    (1 | scenario),
-                                  data = politeness)
+complicated_model_1 <- lme4::lmer(f0mn ~ attitude * gender + (1 | subject) + (1 | scenario), data = politeness)
 
-complicated_model_2 <- lme4::lmer(f0mn ~ attitude * gender +
-                                    (gender | subject) +
-                                    (1 | scenario),
-                                  data = politeness)
+complicated_model_2 <- lme4::lmer(f0mn ~ attitude * gender + (gender | subject) + (1 | scenario), data = politeness)
 ```
 
 i. Explain what each of the group-level effects and _subject_ and _scenario_ effects mean
@@ -545,12 +496,9 @@ We see here virtually no difference here. This clearly showcases the problem wit
 iii. fit this model `f0mn ~ attitude * gender + (gender | subject) + (gender | scenario)`; why does it give a singular fit? and why would you expect this given the design of the study?
 
 ```{r}
-singular_fit_model <- lme4::lmer(f0mn ~ attitude * gender +
-                                   (gender | subject) +
-                                   (gender | scenario),
-                                 data = politeness)
+singular_fit_model <- lme4::lmer(f0mn ~ attitude * gender + (gender | subject) + (gender | scenario), data = politeness)
 
 lme4::isSingular(singular_fit_model) # checking if model is singular or near singular
 ```
+
 This model gives a singular fit due to the "dimensions" of the variance-covariance matrix have estimates of exactly zero. This makes sense since our study only allows for one gender per subject, as explained earlier, but doesn't explain all of it since our earlier model was able to handle it. The last push towards our singular fit here might then be caused by the added (gender | scenario) random effect, since our scenario variable only holds 7 and we are now asking the model to compute the scenario-level intercepts, scenario-level slopes relative to gender, although it is possible, and their correlation - it turns into a lot of different parameters to be computed, but we only have 7 different scenarios to do it with. 
->>>>>>> Alf_exercises
