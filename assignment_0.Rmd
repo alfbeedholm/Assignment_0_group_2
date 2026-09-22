@@ -103,6 +103,8 @@ politeness_yhat <- politeness_no_na %>%
 # plotting the data with color coding by subject
 ggplot(data = politeness_yhat, aes(x = f0mn, y = total_duration, color = subject)) + 
   geom_point() +
+  xlab("Fundamental Frequency (Hz)") +
+  ylab("Total duration (seconds)") +
   geom_line(aes(y = pred))
 ```
 
