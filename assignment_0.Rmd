@@ -104,7 +104,7 @@ politeness_yhat <- politeness_no_na %>%
 ggplot(data = politeness_yhat, aes(x = f0mn, y = total_duration, color = subject)) + 
   geom_point() +
   xlab("Fundamental Frequency (Hz)") +
-  ylab("Total duration (seconds)") +
+  ylab("Total Duration (seconds)") +
   geom_line(aes(y = pred))
 ```
 
@@ -113,7 +113,7 @@ of the acoustic signal by looking at its fundamental frequency; we are letting
 the intercepts vary for each participant, while keeping their slopes constant.
 
 **Relationship between total duration and fundamental frequency**: From fixed 
-effects section of output:  A0.0866 Hz decrease in fundamental frequency can be 
+effects section of output:  A 0.0866 Hz decrease in fundamental frequency can be 
 observed per second increase in duration (similar result from plot). Therefore, 
 there is a negative correlation between total duration and 
 fundamental frequency. Acoustic signals with longer duration generally have 
