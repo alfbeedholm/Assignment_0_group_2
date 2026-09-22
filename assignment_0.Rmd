@@ -12,6 +12,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse, fields)
 ```
 
 REMEMBER: In your portfolio, make sure to include code that can reproduce the answers requested in the exercises below (__MAKE A KNITTED VERSION__). If it does not KNIT, it cannot be part of your portfolio
@@ -22,7 +23,7 @@ In this assignment we will be investigating the _politeness_ dataset of Winter a
 ## Dataset
 The dataset has been shared on GitHub, so make sure that the csv-file is on your current path. Otherwise you can supply the full path.
 
-```{r, eval=FALSE}
+```{r}
 politeness <- read.csv('politeness.csv') # read in data
 ```
 
@@ -107,8 +108,6 @@ ii. also plot the _X_ and _Z_ matrices using _image.plot()_ (for the _Z_, you wi
 **Answer:**
 We will first get the values using the lme4 library
 ```{r}
-library(fields)
-
 X <- lme4::getME(partial_model, "X")
 
 Z <- lme4::getME(partial_model, "Z")
@@ -117,13 +116,14 @@ Z <- as.matrix(Z)
 
 subjects <- politeness |> group_by(subject)
 
-image.plot(x = 1:dim(X)[2], y = 1:dim(X)[1], t(X), # Transposing to make the our design matrix look more traditional
+fields::image.plot(x = 1:dim(X)[2], y = 1:dim(X)[1], t(X), # Transposing to make the our 
+           #design matrix look more traditional
            xlab = "Predictors", ylab = "Observations (n = 212)", xaxt = 'n',
            main = "Design matrix for partial model",
            legend.lab = "Weight") 
 axis(1, 1:dim(X)[2], c('Intercept', 'Slope'))
 
-image.plot(Z,
+fields::image.plot(Z,
            xlab = "Number of random effects (q)", ylab = "Number of observations (n = 16)",
            main = "Pattern of Z matrix",
            legend.lab = "Weight")
@@ -156,9 +156,15 @@ We see a higher standard error for the model with only one second-level effect. 
 We are fitting a more complicated model.
 
 ```{r}
-complicated_model_1 <- lme4::lmer(f0mn ~ attitude * gender + (1 | subject) + (1 | scenario), data = politeness)
+complicated_model_1 <- lme4::lmer(f0mn ~ attitude * gender +
+                                    (1 | subject) +
+                                    (1 | scenario),
+                                  data = politeness)
 
-complicated_model_2 <- lme4::lmer(f0mn ~ attitude * gender + (gender | subject) + (1 | scenario), data = politeness)
+complicated_model_2 <- lme4::lmer(f0mn ~ attitude * gender +
+                                    (gender | subject) +
+                                    (1 | scenario),
+                                  data = politeness)
 ```
 
 i. Explain what each of the group-level effects and _subject_ and _scenario_ effects mean
@@ -181,7 +187,10 @@ We see here virtually no difference here. This clearly showcases the problem wit
 iii. fit this model `f0mn ~ attitude * gender + (gender | subject) + (gender | scenario)`; why does it give a singular fit? and why would you expect this given the design of the study?
 
 ```{r}
-singular_fit_model <- lme4::lmer(f0mn ~ attitude * gender + (gender | subject) + (gender | scenario), data = politeness)
+singular_fit_model <- lme4::lmer(f0mn ~ attitude * gender +
+                                   (gender | subject) +
+                                   (gender | scenario),
+                                 data = politeness)
 
 lme4::isSingular(singular_fit_model) # checking if model is singular or near singular
 ```
