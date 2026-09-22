@@ -480,9 +480,15 @@ We see a higher standard error for the model with only one second-level effect. 
 We are fitting a more complicated model.
 
 ```{r}
-complicated_model_1 <- lme4::lmer(f0mn ~ attitude * gender + (1 | subject) + (1 | scenario), data = politeness)
+complicated_model_1 <- lme4::lmer(f0mn ~ attitude * gender +
+                                    (1 | subject) +
+                                    (1 | scenario),
+                                  data = politeness)
 
-complicated_model_2 <- lme4::lmer(f0mn ~ attitude * gender + (gender | subject) + (1 | scenario), data = politeness)
+complicated_model_2 <- lme4::lmer(f0mn ~ attitude * gender +
+                                    (gender | subject) +
+                                    (1 | scenario),
+                                  data = politeness)
 ```
 
 i. Explain what each of the group-level effects and _subject_ and _scenario_ effects mean
@@ -505,7 +511,10 @@ We see here virtually no difference here. This clearly showcases the problem wit
 iii. fit this model `f0mn ~ attitude * gender + (gender | subject) + (gender | scenario)`; why does it give a singular fit? and why would you expect this given the design of the study?
 
 ```{r}
-singular_fit_model <- lme4::lmer(f0mn ~ attitude * gender + (gender | subject) + (gender | scenario), data = politeness)
+singular_fit_model <- lme4::lmer(f0mn ~ attitude * gender +
+                                   (gender | subject) +
+                                   (gender | scenario),
+                                 data = politeness)
 
 lme4::isSingular(singular_fit_model) # checking if model is singular or near singular
 ```
