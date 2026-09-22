@@ -13,7 +13,9 @@ output: pdf_document
 ```
 
 ```{r setup, include=FALSE}
-library(tidyverse, fields, lme4)
+library(tidyverse)
+library(fields)
+library(lme4)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -258,6 +260,7 @@ loosely because it is more flexible, but requires estimating 6 additional parame
 
 3)  Which variables should be indicated as nominal/categorical?
     i.  use *factor()* to explicitly change these variables into the nominal/categorical category
+
 Nominal/categorical variables are the ones that can be sorted into different groups, but have no inherent ranking/order between them.
 ```{r}
 politeness$attitude <- factor(politeness$attitude)
