@@ -115,8 +115,18 @@ Z <- lme4::getME(partial_model, "Z")
 
 Z <- as.matrix(Z)
 
-image.plot(t(X)) # Transposing to make the our design matrix look more traditional
-image.plot(Z)
+subjects <- politeness |> group_by(subject)
+
+image.plot(x = 1:dim(X)[2], y = 1:dim(X)[1], t(X), # Transposing to make the our design matrix look more traditional
+           xlab = "Predictors", ylab = "Observations (n = 212)", xaxt = 'n',
+           main = "Design matrix for partial model",
+           legend.lab = "Weight") 
+axis(1, 1:dim(X)[2], c('Intercept', 'Slope'))
+
+image.plot(Z,
+           xlab = "Number of random effects (q)", ylab = "Number of observations (n = 16)",
+           main = "Pattern of Z matrix",
+           legend.lab = "Weight")
 ```
 Our modelling of the X matrix shows us how our entire first column is made of 1s as intended with our second column made of the attitudes, either being 1 or 0 depending on if it is either a polite attitude or informal attitude. 
 
