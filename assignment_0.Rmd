@@ -4,23 +4,27 @@ date: "2026-09-17"
 output: pdf_document
 ---
 
+```{=html}
 <style type="text/css">
   body{
   font-size: 14pt;
 }
 </style>
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(tidyverse, fields)
 ```
 
-REMEMBER: In your portfolio, make sure to include code that can reproduce the answers requested in the exercises below (__MAKE A KNITTED VERSION__). If it does not KNIT, it cannot be part of your portfolio
+```{r setup, include=FALSE}
+library(tidyverse, fields, lme4)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+REMEMBER: In your portfolio, make sure to include code that can reproduce the answers requested in the exercises below (**MAKE A KNITTED VERSION**). If it does not KNIT, it cannot be part of your portfolio
 
 # Assignment 0: Using multilevel modelling to model hierarchical data
-In this assignment we will be investigating the _politeness_ dataset of Winter and Grawunder (2012) and apply basic methods of multilevel modelling. 
+
+In this assignment we will be investigating the *politeness* dataset of Winter and Grawunder (2012) and apply basic methods of multilevel modelling.
 
 ## Dataset
+
 The dataset has been shared on GitHub, so make sure that the csv-file is on your current path. Otherwise you can supply the full path.
 
 ```{r}
@@ -28,50 +32,366 @@ politeness <- read.csv('politeness.csv') # read in data
 ```
 
 # Exercises and objectives
-The objectives of the exercises of this assignment are:  
-1) Learning to recognize hierarchical structures within datasets and describing them  
-2) Creating simple multilevel models and assessing their fitness  
+
+The objectives of the exercises of this assignment are:\
+1) Learning to recognize hierarchical structures within datasets and describing them\
+2) Creating simple multilevel models and assessing their fitness\
 3) Working both with linear predictors and categorical predictors
 
-REMEMBER: In your report, make sure to include code that can reproduce the answers requested in the exercises below, i.e. make a knitted version  
+REMEMBER: In your report, make sure to include code that can reproduce the answers requested in the exercises below, i.e. make a knitted version\
 REMEMBER: This assignment will be part of your final portfolio
 
---------------------------------------------------- *Iva* ---------------------------------------------------  
+--------------------------------------------------- *Iva* ---------------------------------------------------
 
 ## Exercise A - describing the dataset and understanding the nature of its variables
 
-1) Describe the dataset, such that someone who happened upon this dataset could understand the 7 variables and what they contain.  This article,https://www.sciencedirect.com/science/article/pii/S0095447012000666,  might help (see Table 1)
-    i. in this description, categorise the 7 variables into either nominal, ordinal, interval or ratio  
-    ii. include number of observations and missing observations  
+1)  Describe the dataset, such that someone who happened upon this dataset could understand the 7 variables and what they contain. This article,<https://www.sciencedirect.com/science/article/pii/S0095447012000666>, might help (see Table 1)
+    i.  in this description, categorise the 7 variables into either nominal, ordinal, interval or ratio\
+    ii. include number of observations and missing observations\
     iii. what do you think are the response variables, i.e. what could work as *y* in fitting models?
-2) Do some analyses with *scenario* as an independent variable  
-    i. fit a multilevel model with _f0mn_ as the dependent variable and *scenario* as the independent variable. Model different intercepts for each _subject_
-    ii. now fit a similar model, but this time have _scenario_ be a nominal variable
-    iii. judging from the residual variance, (_sigma(model)_), what difference does it make whether you encode _scenario_ as a categorical variable or as an integer variable? Why do you get the difference?
-    iv. plot the model matrices, _X_, from the two models, using _image.plot_ from the _fields_ package; describe the two models, and describe the difference between the two kinds of models fitted from these plots  
-    
---------------------------------------------------- *Dori* ---------------------------------------------------  
 
-3) Which variables should be indicated as nominal/categorical?  
-    i. use _factor()_ to explicitly change these variables into the nominal/categorical category
-    
---------------------------------------------------- *Florin* ---------------------------------------------------  
+```{r}
+str(politeness)
+
+```
+
+```{r}
+n_total <- nrow(politeness)
+missing_counts <- colSums(is.na(politeness))
+missing_counts
+```
+
+```{r}
+table(politeness$subject)
+table(politeness$scenario)
+table(politeness$attitude)
+table(politeness$gender)
+```
+
+```{r}
+
+var_table <- data.frame(
+  
+  Variable = c("subject",
+               "gender",
+               "scenario",
+               "attitude",
+               "total_duration",
+               "f0mn",
+               "hiss_count"),
+  
+  Description = c(
+    "An identifier for each participant.",
+    "The gender of each participant.",
+    "The condition type the participant was exposed to",
+    "Speech register condition: polite/formal (pol) vs. informal (inf)",
+    "How long the utterance lasted.",
+    "Mean fundamental frequency of the utterance in Hz; acoustic correlate of pitch.",
+    "Number of noisy breath intakes."
+  ),
+  
+  Type = c(
+    "nominal",
+    "nominal",
+    "nominal",
+    "nominal",
+    "ratio",
+    "ratio",
+    "ratio"
+  ),
+  
+  N = n_total,
+  
+  Missing = c(
+    missing_counts["subject"],
+    missing_counts["gender"],
+    missing_counts["scenario"],
+    missing_counts["attitude"],
+    missing_counts["total_duration"],
+    missing_counts["f0mn"],
+    missing_counts["hiss_count"]
+  ),
+  
+   "Role in models" = c(
+    "grouping variable",
+    "predictor",
+    "predictor",
+    "predictor",
+    "response variable (can be a predictor)",
+    "response variable (can be a predictor)",
+    "response variable (can be a predictor)"
+  ),
+  check.names = FALSE
+)
+
+knitr::kable(var_table,
+             caption = "Description of variables in the politeness dataset",
+             row.names = FALSE)
+```
+
+Note: Answering all sub-questions for exercise 1 below.
+
+The presented dataset is the *politeness* dataset from Winter and Grawunder (2012).
+It contains 224 observations (utterances) and includes 16 subjects (9 female, 7 male).
+
+The data is hierarchical: utterances are nested within subjects, and crossed with
+7 different scenarios and 2 attitude conditions. See the table above for a summary
+of the variables.
+
+The variables *subject*, *gender*, *scenario*, and *attitude* are nominal because
+they are labels or categories with no inherent order (e.g., for *scenario* the numbers
+1-7 are just labels for different interaction types, and not a continuous scale).
+
+The variables *total_duration*, *f0mn*, and *hiss_count* are ratio variables because
+they are continuous measurements with a true 0.
+
+While there are 224 total observations, *f0mn* has 12 missing values, which means
+that any model using *f0mn* as the response will effectively use 212 observations.
+
+The primary response variables in this study are *f0mn*, *total_duration*, and
+*hiss_count* because these are the measured acoustic outcomes of the speech.
+The other variables are predictors or grouping variables that explain the
+variation in those responses.
+
+2)  Do some analyses with *scenario* as an independent variable
+    i.  fit a multilevel model with *f0mn* as the dependent variable and *scenario* as the independent variable. Model different intercepts for each *subject*
+
+```{r}
+
+#checking how scenario is currently stored as
+class(politeness$scenario)
+table(politeness$scenario)
+
+```
+
+```{r}
+
+# Model, in which scenario is plotted as numeric
+m_num <- lme4::lmer(f0mn ~ scenario + (1 | subject), data = politeness)
+
+m_num
+```
+
+ii. now fit a similar model, but this time have _scenario_ be a nominal variable
+
+```{r}
+# Model, in which scenario is plotted as nominal
+
+m_nom <- lme4::lmer(f0mn ~ factor(scenario) + (1 | subject), data = politeness)
+
+m_nom
+```
+
+iii. judging from the residual variance, (_sigma(model)_), what difference does it make whether you encode _scenario_ as a categorical variable or as an integer variable? Why do you get the difference?
+
+```{r}
+# Checking sigma for each model
+sigma(m_num)
+sigma(m_nom)
+```
+
+The residual standard deviation for the numerical model was 32.11, while for the
+nominal model it was 30.67. This indicates that the nominal model explains slightly
+more variance in f0mn than the numerical model. This may be so because the numerical
+model forces a single linear trend across scenarios 1-7. If the true relationship
+between *scenario* and *f0mn* is not such straight line, the numerical model will
+leave more unexplained variance. The nominal model allows for more flexibility by
+estimating a separate intercept for each scenario, therefore reducing the residual
+standard deviation.
+
+iv. plot the model matrices, _X_, from the two models, using _image.plot_ from the _fields_ package; describe the two models, and describe the difference between the two kinds of models fitted from these plots.
+
+```{r}
+X_num <- model.matrix(m_num)
+X_nom <- model.matrix(m_nom)
+
+dim(X_num)
+dim(X_nom)
+
+```
+
+```{r}
+fields::image.plot(x = 1:dim(X_nom)[2], y = 1:dim(X_nom)[1], t(X_nom),
+                   main = "X matrix: scenario as nominal",
+                   xlab = "Predictors",
+                   ylab = "Observations (n = 212)",
+                   legend.lab = "Weight"
+                   )
+
+
+
+fields::image.plot(x = 1:dim(X_num)[2], y = 1:dim(X_num)[1], t(X_num), 
+           main = "X matrix: scenario as numerical",
+           xlab = "Predictors",
+           ylab = "Observations (n = 212)",
+           legend.lab = "Weight",
+           xaxt = "n")
+
+axis(1, 1:dim(X_num)[2], c("Intercept", "Slope"))
+
+```
+
+
+
+We transposed the model matrices before the visualization to make the structure
+clearer. The first model (X_num) treats *scenario* as a numerical variable.
+In the plot the y-axis represents the rows (the 212 observations) and the x-axis
+represents the columns (variables). The plot shows 2 bands. The solid purple band
+is the Intercept (solid because it is always 1). The other band is the *scenario*
+variable, which shows a gradient of colors, which represent the numbers 1 to 7.
+This means that the numerical model estimates a single linear slope for scenario.
+
+The second model (X_nom) treats *scenario* as a nominal variable. The plot shows
+7 bands. The solid band (this time in red) is again the Intercept. The six
+remaining bands are dummy variables for scenarios 2-7. They only consist of 0s
+and 1s, which indicates that the model estimates a separate intercept for each
+scenario rather than a single slope.
+
+**The difference between the models:** The numerical model uses only 1 parameter
+for scenario and therefore assumes a straight-line relationship, while the nominal
+model uses 7 parameters, which allows each scenario to have its own independent mean.
+
+This explains the residual variance: the nominal model can fit the data more
+loosely because it is more flexible, but requires estimating 6 additional parameters.
+
+--------------------------------------------------- *Dori* ---------------------------------------------------
+
+3)  Which variables should be indicated as nominal/categorical?
+    i.  use *factor()* to explicitly change these variables into the nominal/categorical category
+Nominal/categorical variables are the ones that can be sorted into different groups, but have no inherent ranking/order between them.
+```{r}
+politeness$attitude <- factor(politeness$attitude)
+politeness$scenario <- factor(politeness$scenario)
+politeness$gender <- factor(politeness$gender)
+```
+
+--------------------------------------------------- *Florin* ---------------------------------------------------
 
 ## Exercise B - pooling - linear regression
 
-1) Across _scenario's_, Do a no-pooling model, a complete-pooling model and a partial-pooling model with _total_duration_ as the dependent variable and *f0mn* as the independent variable. Model individual intercepts for each _scenario_ for the partial pooling and the no-pooling models
-    i. compare the residual variance between the three models - which results in explaining most variance?
-    ii. for the partial-pooling model, add different intercepts for each _subject_ and compare the residual variance in this model with the remaining three  
-    iii. how would you model a no-pooling model that took both _subject_ and _scenario_ into account?
-    iv. each _subject_ was exposed to each _scenario_; what is the effect of using the second-level effect (1 + subject:scenario) with the first-level effects already modeled?
-    
---------------------------------------------------- *Dori* ---------------------------------------------------  
-2) Plot a model for each subject, ignoring scenarios for now `total_duration ~ f0mn + (1 | subject)`
-    i. create a plot with a subplot for each subject. This plot should contain the observed values for the dependent values and the fitted lines for each subject, ignoring differences in _scenarios_
-    ii. describe what the plots and the model reveal about the relationship between _total_duration_ and _f0mn_
-    iii. why do you think the slope is negative? (check the paper this is based on)
+1)  Across *scenario's*, Do a no-pooling model, a complete-pooling model and a partial-pooling model with *total_duration* as the dependent variable and *f0mn* as the independent variable. Model individual intercepts for each *scenario* for the partial pooling and the no-pooling models
 
---------------------------------------------------- *Alf* ---------------------------------------------------  
+```{r}
+df = politeness
+
+# Complete-pooling model
+cp_model <- lm(data = df, formula = total_duration ~ f0mn)
+
+# No-pooling model
+np_model <- lm(data = df, formula = total_duration ~ f0mn + scenario - 1)
+
+# Partial-pooling model
+pp_model <- lmer(data = df, formula = total_duration ~ f0mn + (1 | scenario))
+```
+
+i. compare the residual variance between the three models - which results in explaining most variance?
+
+```{r}
+  # We will define a function that compares model variance
+compare_var <- function(models, complete_comparison = TRUE){
+  # complete_comparison is to be set to FALSE when we want a quick answer
+  # regarding the least residual variance and not all of the variances
+  
+  min_var = Inf
+  for (model_name in names(models)){
+    model <- models[[model_name]]
+    var <- summary(model)$sigma^2
+    
+    # Outputs all residual variances if complete_comparison is TRUE
+    if(complete_comparison){
+      cat("Unexplained variance for the", model_name, "=", round(var,2), "\n")
+    }
+    
+    # Compares the variances to determine the lowest
+    if (var < min_var){
+      min_var <- var
+      best_model <- model_name
+    }
+  }
+  
+  cat("\nThe model that explains the most variance is the ", best_model, ".", sep="")
+  
+  # This returns only the minimum unexplained variance
+  if(!complete_comparison){
+    cat("\n\nUnexplained variance for", best_model, "=", round(min_var,2), "\n")
+  }
+}
+
+# We name the models in a list then call the function
+models <- list("complete-pooling model" = cp_model,
+               "no-pooling model" = np_model,
+               "partial-pooling model" = pp_model)
+compare_var(models)
+```
+
+ii. for the partial-pooling model, add different intercepts for each _subject_ and compare the residual variance in this model with the remaining three
+
+```{r, warning=FALSE}
+pp_model_new <- lmer(data = df,
+                 formula = total_duration ~ f0mn + (1 | scenario) + (1 | subject))
+
+models["partial-pooling model with different subjects intercepts"] <- pp_model_new
+compare_var(models, complete_comparison = FALSE)
+```
+
+  Compared to the previous models, the partial-pooling model that includes random intercepts for both scenarios and subjects accounts for the most variance.
+
+iii. how would you model a no-pooling model that took both _subject_ and _scenario_ into account?
+
+```{r}
+np_model_new <- lm(data = df, formula = total_duration ~ f0mn + scenario - 1 + subject - 1)
+```
+
+iv. each _subject_ was exposed to each _scenario_; what is the effect of using the second-level effect (1 + subject:scenario) with the first-level effects already modeled?
+
+```{r, warning = FALSE}
+pp_model_newest <- lmer(data = df,
+                 formula = total_duration ~ f0mn + (1 | subject:scenario))
+
+models["(1+subject:scenario) model"] <- pp_model_newest
+compare_var(models, complete_comparison = FALSE)
+```
+
+  This model adds random intercepts for every subject x scenario combination and results in the lowest residual variation. However, because there are only 2 data points per subject x scenario combo, it runs a high risk of overfitting, hurting the degree to which it can be generalized to newer data.
+
+--------------------------------------------------- *Dori* ---------------------------------------------------\
+2) Plot a model for each subject, ignoring scenarios for now `total_duration ~ f0mn + (1 | subject)` i. create a plot with a subplot for each subject. This plot should contain the observed values for the dependent values and the fitted lines for each subject, ignoring differences in *scenarios* ii. describe what the plots and the model reveal about the relationship between *total_duration* and *f0mn* iii. why do you think the slope is negative? (check the paper this is based on)
+
+```{r}
+# removing rows with NAs from the dataframe as we're working with f0mn, where the NAs are
+politeness_no_na <- politeness %>% drop_na()
+subj_model <- lmer(total_duration ~ f0mn + (1|subject), data = politeness_no_na)
+fixef(subj_model)
+
+# adding the predicted y values to a new dataframe
+politeness_yhat <- politeness_no_na %>% 
+  mutate(pred = fitted(subj_model))
+
+# plotting the data with color coding by subject
+ggplot(data = politeness_yhat, aes(x = f0mn, y = total_duration, color = subject)) + 
+  geom_point() +
+  xlab("Fundamental Frequency (Hz)") +
+  ylab("Total Duration (seconds)") +
+  geom_line(aes(y = pred))
+```
+
+**Short description of what the model does**: We are predicting total duration 
+of the acoustic signal by looking at its fundamental frequency; we are letting 
+the intercepts vary for each participant, while keeping their slopes constant.
+
+**Relationship between total duration and fundamental frequency**: From fixed 
+effects section of output:  A 0.0866 Hz decrease in fundamental frequency can be 
+observed per second increase in duration (similar result from plot). Therefore, 
+there is a negative correlation between total duration and 
+fundamental frequency. Acoustic signals with longer duration generally have 
+lower frequencies. 
+
+**Why the slope is negative**: According to the paper, participants spoke on 
+average 0.38 ± 0.18 syllables per second slower in the formal condition; 
+and since the fundamental frequency was also found to be lower in the 
+formal condition, the negative slope makes sense.
+
+--------------------------------------------------- *Alf* ---------------------------------------------------
 
 ## Exercise C - pooling - categorical predictors
 
@@ -114,19 +434,20 @@ Z <- lme4::getME(partial_model, "Z")
 
 Z <- as.matrix(Z)
 
-subjects <- politeness |> group_by(subject)
-
-fields::image.plot(x = 1:dim(X)[2], y = 1:dim(X)[1], t(X), # Transposing to make the our 
-           #design matrix look more traditional
-           xlab = "Predictors", ylab = "Observations (n = 212)", xaxt = 'n',
-           main = "Design matrix for partial model",
-           legend.lab = "Weight") 
-axis(1, 1:dim(X)[2], c('Intercept', 'Slope'))
-
-fields::image.plot(Z,
-           xlab = "Number of random effects (q)", ylab = "Number of observations (n = 16)",
-           main = "Pattern of Z matrix",
-           legend.lab = "Weight")
+image.plot(x = 1:dim(X)[2], y = 1:dim(X)[1], t(X), xaxt = "n", # Transposing to 
+           #make the our design matrix look more traditional
+           xlab = "Predictors", 
+           ylab = "Observations (n = 212)",
+           main = "Visualisation of categorical X matrix",
+           legend.lab = "Weight"
+           ) 
+axis(1, 1:dim(X)[2], c("Intercept", "Slope"))
+image.plot(x = 1:dim(Z)[1], y = 1:dim(Z)[2], Z,
+           xlab = "Observations (n)", 
+           ylab = "Number of random effects (q)",
+           main = "Visualisation of categorical Z matrix",
+           legend.lab = "Weight"
+           ) 
 ```
 Our modelling of the X matrix shows us how our entire first column is made of 1s as intended with our second column made of the attitudes, either being 1 or 0 depending on if it is either a polite attitude or informal attitude. 
 
@@ -135,7 +456,7 @@ The Z matrix holds two effects. It holds effects of both subject and scenario, a
 iii. fit an identical model, except that you remove _scenario_ from the second-level effects. For both models, find the std. errors associated with the group-level effect of attitude - how do they differ and why?
 
 **Answer:**
-We write code to find the std. errors to compare.
+We write code to find the standard errors to compare.
 ```{r}
 partial_model2 <- lme4::lmer(
   f0mn ~ attitude + (1|subject), # now only including one second-level effect
@@ -156,15 +477,9 @@ We see a higher standard error for the model with only one second-level effect. 
 We are fitting a more complicated model.
 
 ```{r}
-complicated_model_1 <- lme4::lmer(f0mn ~ attitude * gender +
-                                    (1 | subject) +
-                                    (1 | scenario),
-                                  data = politeness)
+complicated_model_1 <- lme4::lmer(f0mn ~ attitude * gender + (1 | subject) + (1 | scenario), data = politeness)
 
-complicated_model_2 <- lme4::lmer(f0mn ~ attitude * gender +
-                                    (gender | subject) +
-                                    (1 | scenario),
-                                  data = politeness)
+complicated_model_2 <- lme4::lmer(f0mn ~ attitude * gender + (gender | subject) + (1 | scenario), data = politeness)
 ```
 
 i. Explain what each of the group-level effects and _subject_ and _scenario_ effects mean
@@ -187,11 +502,9 @@ We see here virtually no difference here. This clearly showcases the problem wit
 iii. fit this model `f0mn ~ attitude * gender + (gender | subject) + (gender | scenario)`; why does it give a singular fit? and why would you expect this given the design of the study?
 
 ```{r}
-singular_fit_model <- lme4::lmer(f0mn ~ attitude * gender +
-                                   (gender | subject) +
-                                   (gender | scenario),
-                                 data = politeness)
+singular_fit_model <- lme4::lmer(f0mn ~ attitude * gender + (gender | subject) + (gender | scenario), data = politeness)
 
 lme4::isSingular(singular_fit_model) # checking if model is singular or near singular
 ```
+
 This model gives a singular fit due to the "dimensions" of the variance-covariance matrix have estimates of exactly zero. This makes sense since our study only allows for one gender per subject, as explained earlier, but doesn't explain all of it since our earlier model was able to handle it. The last push towards our singular fit here might then be caused by the added (gender | scenario) random effect, since our scenario variable only holds 7 and we are now asking the model to compute the scenario-level intercepts, scenario-level slopes relative to gender, although it is possible, and their correlation - it turns into a lot of different parameters to be computed, but we only have 7 different scenarios to do it with. 
