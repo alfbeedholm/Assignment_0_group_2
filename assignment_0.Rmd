@@ -71,7 +71,13 @@ table(politeness$gender)
 
 var_table <- data.frame(
   
-  Variable = c("subject", "gender", "scenario", "attitude", "total_duration", "f0mn", "hiss_count"),
+  Variable = c("subject",
+               "gender",
+               "scenario",
+               "attitude",
+               "total_duration",
+               "f0mn",
+               "hiss_count"),
   
   Description = c(
     "An identifier for each participant.",
@@ -117,20 +123,32 @@ var_table <- data.frame(
   check.names = FALSE
 )
 
-knitr::kable(var_table, caption = "Description of variables in the politeness dataset", row.names = FALSE)
+knitr::kable(var_table,
+             caption = "Description of variables in the politeness dataset",
+             row.names = FALSE)
 ```
 
-The presented dataset is the *politeness* dataset from Winter and Grawunder (2012). It contains 224 observations (utterances) and includes 16 subjects (8 female, 8 male).
+The presented dataset is the *politeness* dataset from Winter and Grawunder (2012).
+It contains 224 observations (utterances) and includes 16 subjects (9 female, 7 male).
 
-The data is hierarchical: utterances are nested within subjects, and crossed with 7 different scenarios and 2 attitude conditions. See the table above for a summary of the variables.
+The data is hierarchical: utterances are nested within subjects, and crossed with
+7 different scenarios and 2 attitude conditions. See the table above for a summary
+of the variables.
 
-The variables *subject*, *gender*, *scenario*, and *attitude* are nominal because they are labels or categories with no inherent order (e.g., for *scenario* the numbers 1-7 are just labels for different interaction types, and not a continuous scale).
+The variables *subject*, *gender*, *scenario*, and *attitude* are nominal because
+they are labels or categories with no inherent order (e.g., for *scenario* thenumbers
+1-7 are just labels for different interaction types, and not a continuous scale).
 
-The variables *total_duration*, *f0mn*, and *hiss_count* are ratio variables because they are continuous measurements with a true 0.
+The variables *total_duration*, *f0mn*, and *hiss_count* are ratio variables because
+they are continuous measurements with a true 0.
 
-While there are 224 total observations, *f0mn* has 12 missing values, which means that any model using *f0mn* as the response will effectively use 212 observations.
+While there are 224 total observations, *f0mn* has 12 missing values, which means
+that any model using *f0mn* as the response will effectively use 212 observations.
 
-The primary response variables in this study are *f0mn*, *total_duration* and *hiss_count* because these are the measured acoustic outcomes of the speech. The other variables are predictors or grouping variables that explain the variation in those responses.
+The primary response variables in this study are *f0mn*, *total_duration* and
+*hiss_count* because these are the measured acoustic outcomes of the speech.
+The other variables are predictors or grouping variables that explain the
+variation in those responses.
 
 2)  Do some analyses with *scenario* as an independent variable
     i.  fit a multilevel model with *f0mn* as the dependent variable and *scenario* as the independent variable. Model different intercepts for each *subject*
@@ -173,7 +191,14 @@ sigma(m_num)
 sigma(m_nom)
 ```
 
-The residual standard deviation for the numerical model was 32.11, while for the nominal model it was 30.67. This indicates that the nominal model explains slightly more variance in f0mn than the numerical model. This may be so because the numerical model forces a single linear trend across scenarios 1-7. If the true relationship between *scenario* and *f0mn* is not such straight line, the numerical model will leave more unexplained variance. The nominal model allows for more flexibility by estimating a separate intercept for each scenario, therefore reducing the residual standard deviation.
+The residual standard deviation for the numerical model was 32.11, while for the
+nominal model it was 30.67. This indicates that the nominal model explains slightly
+more variance in f0mn than the numerical model. This may be so because the numerical
+model forces a single linear trend across scenarios 1-7. If the true relationship
+between *scenario* and *f0mn* is not such straight line, the numerical model will
+leave more unexplained variance. The nominal model allows for more flexibility by
+estimating a separate intercept for each scenario, therefore reducing the residual
+standard deviation.
 
 ```         
 iv. plot the model matrices, _X_, from the two models, using _image.plot_ from the _fields_ package; describe the two models, and describe the difference between the two kinds of models fitted from these plots  
@@ -189,22 +214,46 @@ dim(X_nom)
 ```
 
 ```{r}
-fields::image.plot(t(X_nom),
+fields::image.plot(x = 1:dim(X_nom)[2], y = 1:dim(X_nom)[1], t(X_nom),
                    main = "X matrix: scenario as nominal",
-                   xlab = "Variables",
-                   ylab = "Observations (n = 212)")
+                   xlab = "Predictors",
+                   ylab = "Observations (n = 212)"
+                   )
 
-fields::image.plot(t(X_num), 
+
+
+fields::image.plot(x = 1:dim(X_num)[2], y = 1:dim(X_num)[1], t(X_num), 
            main = "X matrix: scenario as numerical",
-           xlab = "Variables",
-           ylab = "Observations (n = 212)")
+           xlab = "Predictors",
+           ylab = "Observations (n = 212)",
+           xaxt = "n")
+
+axis(1, 1:dim(X_num)[2], c("Intercept", "Slope"))
+
 ```
 
-We transposed the model matrices before the visualization to make the structure clearer. The first model (X_num) treats *scenario* as a numerical variable. In the plot the y-axis represents the rows (the 212 observations) and the x-axis represents the columns (variables). The plot shows 2 bands. The solid purple band is the Intercept (solid because it is always 1). The other band is the *scenario* variable, which shows a gradient of colors, which represent the numbers 1 to 7. This means that the numerical model estimates a single linear slope for scenario.
 
-The second model (X_nom) treats *scenario* as a nominal variable. The plot shows 7 bands. The solid band (this time in red) is again the Intercept. The six remaining bands are dummy variables for scenarios 2-7. They only consist of 0s and 1s, which indicates that the model estimates a separate intercept for each scenario rather than a single slope.
 
-**The difference between the models:** The numerical model uses only 1 parameter for scenario and therefore assumes a straight-line relationship, while the nominal model uses 6 parameters, which allows each scenario to have its own independent mean. This explains the residual variance: the nominal model can fit the data more loosely because it is more flexible, but requires estimating 6 additional parameters.
+We transposed the model matrices before the visualization to make the structure
+clearer. The first model (X_num) treats *scenario* as a numerical variable.
+In the plot the y-axis represents the rows (the 212 observations) and the x-axis
+represents the columns (variables). The plot shows 2 bands. The solid purple band
+is the Intercept (solid because it is always 1). The other band is the *scenario*
+variable, which shows a gradient of colors, which represent the numbers 1 to 7.
+This means that the numerical model estimates a single linear slope for scenario.
+
+The second model (X_nom) treats *scenario* as a nominal variable. The plot shows
+7 bands. The solid band (this time in red) is again the Intercept. The six
+remaining bands are dummy variables for scenarios 2-7. They only consist of 0s
+and 1s, which indicates that the model estimates a separate intercept for each
+scenario rather than a single slope.
+
+**The difference between the models:** The numerical model uses only 1 parameter
+for scenario and therefore assumes a straight-line relationship, while the nominal
+model uses 6 parameters, which allows each scenario to have its own independent mean.
+
+This explains the residual variance: the nominal model can fit the data more
+loosely because it is more flexible, but requires estimating 6 additional parameters.
 
 --------------------------------------------------- *Dori* ---------------------------------------------------
 
