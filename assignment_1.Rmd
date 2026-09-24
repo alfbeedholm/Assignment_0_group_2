@@ -4,6 +4,14 @@ date: "2026-09-24"
 output: html_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE) 
+```
+
+```{r, include = FALSE}
+pacman::p_load(tidyverse, readbulk, patchwork, lmerTest)
+```
+
 REMEMBER: In your portfolio, make sure to include code that can reproduce the answers requested in the exercises below (**MAKE A KNITTED VERSION**). If it does not KNIT, it cannot be part of your portfolio
 
 # Exercises and objectives
@@ -21,6 +29,15 @@ Go to <https://osf.io/ecxsj/files/> and download the files associated with Exper
 The data is associated with Experiment 2 of the article at the following DOI <https://doi.org/10.1016/j.concog.2019.03.007>
 
 1)  Put the data from all subjects into a single data frame\
+
+```{r}
+data <- read_bulk(
+  directory = "experiment_2/",
+  fun = read_csv,
+  col_types = cols()
+  )
+```
+
 2)  Describe the data and construct extra variables from the existing variables
     i.  add a variable to the data frame and call it *correct* (have it be a *logical* variable). Assign a 1 to each row where the subject indicated the correct answer and a 0 to each row where the subject indicated the incorrect answer (**Hint:** the variable *obj.resp* indicates whether the subject answered "even", *e* or "odd", *o*, and the variable *target_type* indicates what was actually presented.
     ii. describe what the following variables in the data frame contain, *trial.type*, *pas*, *trial*, *target.contrast*, *cue*, *task*, *target_type*, *rt.subj*, *rt.obj*, *obj.resp*, *subject* and *correct*. (That means you can ignore the rest of the variables in your description). For each of them, indicate and argue for what `class` they should be classified into, e.g. *factor*, *numeric* etc., and apply that class! (**Don't code variables as ordinal; if you think they are ordinal, just code them as a factor**)
