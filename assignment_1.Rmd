@@ -13,6 +13,8 @@ A) Download and organise the data and model\
 B) Fit multilevel models for binomial data\
 C) Fit multilevel models for count data
 
+--------------------------------------------------- *Alf* ---------------------------------------------------
+
 ## Exercise A - Download and organise the data and model
 
 Go to <https://osf.io/ecxsj/files/> and download the files associated with Experiment 2 (there should be 29).\
@@ -29,10 +31,15 @@ We **only** look at the *experiment* trials (*trial.type*)
 
 1)  Fit a multilevel model that models *correct* as dependent on *task* with a unique intercept for each *subject*
     i.  does *task* explain performance?\
-    ii. add *pas* as a main effect on top of *task* - what are the consequences of that?\
-    iii. now fit a multilevel model that models *correct* as dependent on *pas* with a unique intercept for each *subject*
-    iv. finally, fit a model that models the interaction between *task* and *pas* and their main effects, still with a unique intercept for each *subject*\
-    v.  describe in your own words which model is the best in explaining the variance in accuracy, and based on your chosen model - write a short summary on what this says about accuracy as dependent on *pas* and *task*. You should include at least one informative plot that shows the estimated probability of being correct for each of the levels of *task* and *pas* (and their interaction if you included that in your model).
+    
+--------------------------------------------------- *Iva* ---------------------------------------------------
+    
+  ii. add *pas* as a main effect on top of *task* - what are the consequences of that?\
+  iii. now fit a multilevel model that models *correct* as dependent on *pas* with a unique intercept for each *subject*
+  iv. finally, fit a model that models the interaction between *task* and *pas* and their main effects, still with a unique intercept for each *subject*\
+  v.  describe in your own words which model is the best in explaining the variance in accuracy, and based on your chosen model - write a short summary on what this says about accuracy as dependent on *pas* and *task*. You should include at least one informative plot that shows the estimated probability of being correct for each of the levels of *task* and *pas* (and their interaction if you included that in your model).
+
+--------------------------------------------------- *Florin* ---------------------------------------------------
 
 ## Exercise C - Fit multilevel models for count data
 
@@ -52,6 +59,9 @@ data.count <- data.frame(count = numeric(),
     i.  which family should be used?\
     ii. why is a slope for *pas* not really being modelled, and what are we modelling instead?\
     iii. if you get a convergence error, try another algorithm (the default is the *Nelder_Mead*) - try (*bobyqa*) for which the `dfoptim` package is needed. In `glmer`, you can add the following for the `control` argument: `glmerControl(optimizer="bobyqa")` (if you are interested, also have a look at the function `allFit`)
-    iv. when you have a converging fit - fit a model with only the main effects of *pas* and *task*. Compare this with the model that also includes the interaction
-    v.  indicate which of the two models, you would choose and why\
-    vi. based on your chosen model - write a short summary on what this says about the distribution of ratings as dependent on *pas* and *task* and their interaction. You should include at least one informative plot that shows the estimated rate of events for each of the levels of *task* and *pas* (and their interaction if you included that in your model)
+    
+--------------------------------------------------- *Dori* ---------------------------------------------------
+    
+  iv. when you have a converging fit - fit a model with only the main effects of *pas* and *task*. Compare this with the model that also includes the interaction
+  v.  indicate which of the two models, you would choose and why\
+  vi. based on your chosen model - write a short summary on what this says about the distribution of ratings as dependent on *pas* and *task* and their interaction. You should include at least one informative plot that shows the estimated rate of events for each of the levels of *task* and *pas* (and their interaction if you included that in your model)
