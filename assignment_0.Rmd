@@ -1,7 +1,8 @@
 ---
-title: "assignment_0, Methods 3, 2026"
+title: "Assignment_0, Methods 3, 2026"
 date: "2026-09-17"
 output: pdf_document
+author: "Alf, Dorottya (Dori), Florin, and Iva"
 ---
 
 ```{=html}
@@ -18,8 +19,6 @@ library(fields)
 library(lme4)
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-REMEMBER: In your portfolio, make sure to include code that can reproduce the answers requested in the exercises below (**MAKE A KNITTED VERSION**). If it does not KNIT, it cannot be part of your portfolio
 
 # Assignment 0: Using multilevel modelling to model hierarchical data
 
@@ -39,9 +38,6 @@ The objectives of the exercises of this assignment are:\
 1) Learning to recognize hierarchical structures within datasets and describing them\
 2) Creating simple multilevel models and assessing their fitness\
 3) Working both with linear predictors and categorical predictors
-
-REMEMBER: In your report, make sure to include code that can reproduce the answers requested in the exercises below, i.e. make a knitted version\
-REMEMBER: This assignment will be part of your final portfolio
 
 --------------------------------------------------- *Iva* ---------------------------------------------------
 
@@ -78,7 +74,7 @@ var_table <- data.frame(
                "gender",
                "scenario",
                "attitude",
-               "total_duration",
+               "total_\nduration",
                "f0mn",
                "hiss_count"),
   
@@ -92,7 +88,7 @@ var_table <- data.frame(
     "Number of noisy breath intakes."
   ),
   
-  Type = c(
+  "Variable type" = c(
     "nominal",
     "nominal",
     "nominal",
@@ -104,7 +100,7 @@ var_table <- data.frame(
   
   N = n_total,
   
-  Missing = c(
+  "Missing  " = c( # Made spacing in name for cosmetic purposes
     missing_counts["subject"],
     missing_counts["gender"],
     missing_counts["scenario"],
@@ -312,7 +308,7 @@ compare_var <- function(models, complete_comparison = TRUE){
     }
   }
   
-  cat("\nThe model that explains the most variance is the ", best_model, ".", sep="")
+  cat("\nThe model that explains the most variance is:\nthe ", best_model, ".", sep="")
   
   # This returns only the minimum unexplained variance
   if(!complete_comparison){
@@ -452,9 +448,9 @@ image.plot(x = 1:dim(Z)[1], y = 1:dim(Z)[2], Z,
            legend.lab = "Weight"
            ) 
 ```
-Our modelling of the X matrix shows us how our entire first column is made of 1s as intended with our second column made of the attitudes, either being 1 or 0 depending on if it is either a polite attitude or informal attitude. 
+Our modelling of the X matrix shows us how our entire first column is made of 1s, as intended, with our second column made of the attitudes, either being 1 or 0 depending on if it is either a polite attitude or informal attitude. 
 
-The Z matrix holds two effects. It holds effects of both subject and scenario, as we modeled it to have. We can see how each subject, being each "step" of the big diagonal line" holds 1 values and all have a corresponding scenario represented through the diagonal - essentially being all the different scenarios that subject did. 
+The Z matrix holds two effects. It holds effects of both subject and scenario, as we modeled it to have. We can see how each subject, being each "step" of the big diagonal line" holds 1 values and all have a corresponding scenario represented through the upper diagonal - essentially being all the different scenarios that subject did. 
 
 iii. fit an identical model, except that you remove _scenario_ from the second-level effects. For both models, find the std. errors associated with the group-level effect of attitude - how do they differ and why?
 
